@@ -1,0 +1,178 @@
+
+//copied directly from Ushi No Tane x6 and reformatted by Spivee
+
+/*
+ * Cooking Recipes
+ * There are a handfull of ingredients that you can only aquire once a year. 
+ * The Buckwheat Flour come from the New Years Eve festival if you don't have any 
+ * items equiped in the colored slots of your Rucksack, and Ricecakes are given to you at the New Years Day festival.
+ * 
+ * When selecting milk or eggs, any size will work unless specified in the recipe.
+ */
+ 
+//Frying Pan: 23 Recipes
+
+[Stir Fry]:[Oil,Cabbage]
+[Fried Rice]:[Riceballs,Oil,Egg]
+[Savory Pancake]:[Cabbage,Flour,Egg,Oil]
+[French Fries]:[Potato,Oil]
+[Croquette]:[Potato,Onion,Egg,Flour,Oil]
+[Popcorn]:[Corn]
+[Cornflakes]:[Corn,Milk]
+[Happy Eggplant]:[Eggplant]
+[Scrambled Eggs]:[Egg,Oil]
+[Omelet]:[Egg,Milk,Oil]
+[Omelet Rice]:[Egg,Milk,Oil,Riceballs]
+[Apple Souffle]:[Apple]
+[Curry Bread]:[Bread,Curry Powder,Oil]
+[French Toast]:[Egg,Bread,Oil]
+[Doughnut]:[Egg,Milk,Butter,Flour,Oil]
+[Grilled Fish]:[Medium Fish]
+[Fried Thick Noodles]:[Noodles,Oil]
+[Fried Noodles]:[Buckwheat Noodles,Oil]
+[Tempura]:[Egg,Flour,Oil]
+[Pancake]:[Egg,Milk,Flour,Oil]
+[Pot Sticker]:[Cabbage,Onion,Flour,Oil]
+[Risotto]:[Tomato,Onion,Riceballs,Oil]
+[Dry Curry]:[Riceballs,Curry Powder]
+ 
+//Cooking Pot: 41 Recipes
+
+[Hot Milk]:[Milk]
+[Hot Chocolate]:[Milk,Chocolate]
+[Grape Wine]:[Grape,Wine,Purple Grass]
+[Pumpkin Stew]:[Pumpkin]
+[Fish Stew]:[Medium Fish or Large Fish]
+[Boiled Spinach]:[Spinach]
+[Boiled Egg]:[Egg]
+[Candied Potato]:[Yam]
+[Dumplings]:[Cabbage,Onion,Flour,Oil]
+[Strawberry Jam]:[Strawberry]
+[Apple Jam]:[Apple]
+[Grape Jam]:[Grape]
+[Marmalade]:[Orange]
+[Cheese Fondue]:[Cheese,Bread]
+[Noodles]:[Flour]
+[Curry Noodles]:[Noodles,Curry Powder]
+[Tempura Noodles]:[Tempura,Noodles]
+[Buckwheat Noodles]:[Buckwheat Flour]
+[Tempura Buckwheat Noodles]:[Buckwheat Noodles,Tempura]
+[Mountain Stew]:[Carrot,Bamboo Shoots,shiitake]
+[Rice Soup]:[Riceballs]
+[Porridge]:[Milk,Riceballs]
+[Tempura Rice]:[Riceballs,Tempura]
+[Egg Over Rice]:[Egg,Riceballs]
+[Stew]:[Milk,Flour]
+[Curry Rice]:[Riceballs,Curry Powder]
+[Blue Curry]:[Riceballs,Curry Powder,Blue Grass]
+[Green Curry]:[Riceballs,Curry Powder,Green Grass]
+[Red Curry]:[Riceballs,Curry Powder,Red Grass]
+[Yellow Curry]:[Riceballs,Curry Powder,Yellow Grass]
+[Orange Curry]:[Riceballs,Curry Powder,Orange Grass]
+[Purple Curry]:[Riceballs,Curry Powder,Purple Grass]
+[Indigo Curry]:[Riceballs,Curry Powder,Indigo Grass]
+[Black Curry]:[Riceballs,Curry Powder,Black Grass]
+[White Curry]:[Riceballs,Curry Powder,White Grass]
+[Rainbow Curry]:[Blue Curry,Green Curry,Red Curry,Yellow Curry,Orange Curry,Purple Curry,Indigo Curry,Curry Rice]
+[Ultimate Curry]:[Rainbow Curry,Black Curry,burnt Frypan dish,burnt Pot dish,burnt Oven dish,burnt Mixer dish,burnt Steamer dish,burnt No Utensil dish]
+[Finest Curry]:[Rainbow Curry,White Curry,burnt Frypan dish,burnt Pot dish,burnt Oven dish,burnt Mixer dish,burnt Steamer dish,burnt No Utensil dish]
+[RelaxTea]:[RelaxTea Leaves]
+[Turbojolt]:[Orange Grass,White Grass,Red MagicRed flower]
+[Bodigizer]:[Orange Grass,Black Grass,Red MagicRed flower]
+
+//Oven: 18 Recipes
+
+[Baked Corn]:[Corn]
+[Toasted Rice Balls]:[Riceballs]
+[Roasted Rice Cake]:[Rice Cake] 
+//from the New Years Day gathering
+[Baked Yam]:[Yam]
+[Toast]:[Bread]
+[Jambun]:[Milk,Egg,Jam]
+[Dinner Roll]:[Egg,Milk,Butter]
+[Pizza]:[Cheese,Flour,Ketchup]
+[Doria]:[Onion,Butter,Milk,Riceballs,Flour]
+[Gratin]:[Onion,Butter,Milk,Cheese,Flour]
+[Buckwheat Ball]:[Egg,Flour,Buckwheat Flour]
+[Sweet Potatoes]:[Egg,Butter,Yam]
+[Cookies]:[Egg,Flour,Butter]
+[Chocolate Cookies]:[Cookie,Chocolate]
+[Cake]:[Egg,Flour,Butter,a fruit]
+[Chocolate Cake]:[Egg,Flour,Butter,Chocolate]
+[Cheesecake]:[Egg,Cheese,Milk]
+[Apple Pie]:[Apple,Egg,Butter,Flour]
+
+//Mixer: 19 Recipes
+
+[Pineapple Juice]:[Pineapple]
+[Tomato Juice]:[Tomato]
+[Grape Juice]:[Grape]
+[Peach Juice]:[Peach]
+[Banana Juice]:[Banana]
+[Orange Juice]:[Orange]
+[Apple Juice]:[Apple]
+[Strawberry Milk]:[Strawberry,Milk]
+/*
+ * [Fruit Juice]:[Srawberry]
+ * [Fruit Latte]:[Fruit Juice,Milk]
+ * [Vegetable Juice]:[Carrot]
+ * [Vegetable Juice]:[Cucumber]
+ * [Vegetable Juice]:[Cabbage]
+ * [Vegetable Latte]:[Vegetable Juice,Milk]
+ * [Mixed Juice]:[(Apple OR Orange OR Pineapple OR Peach OR Banana OR Grape OR Wild Grape),(Carrot OR Cucumber OR Cabbage) ]
+ * Fruit Juice,Vegetable Juice]
+ * [Mixed Latte]:[Milk,(Apple OR Orange OR Pineapple OR Peach OR Banana OR Grape OR Wild Grape),(Carrot OR Cucumber OR Cabbage) OR]
+ * Milk,Mixed Juice OR]
+ * Milk,Fruit Juice,Vegetable Juice]
+ */
+
+ //too hard
+ 
+[Ketchup]:[Tomato,Onion]
+[Butter]:[Milk]
+[Fish Sticks]:[Medium Fish or Large Fish]
+[Turbojolt XL]:[Turbojolt,Green Grass]
+[Bodigizer XL]:[Bodigizer,Blue Grass]
+
+//Steamer: 14 Recipes
+
+[Moon Dumplings]:[Dumpling Powder]
+[Green Dumplings]:[Rice Cake,a weed]
+[Bamboo Dumplings]:[Bamboo Shoots,Rice Cake]
+[Steamed Bun]:[Flour,Oil]
+[Cheese Steamed Bun]:[Cheese,Flour,Oil]
+[Shaomi]:[Onion,Cabbage,Egg,Flour]
+[Steamed Egg]:[Egg,shiitake,Bamboo Shoots]
+[Chinese Bun]:[shiitake,Flour,Bamboo Shoots,Carrot]
+[Curry Bun]:[Flour,Curry Powder]
+[Steamed Dumplings]:[Cabbage,Onion,Flour,Oil]
+[Sponge Cake]:[Egg,Flour]
+[Steamed Cake]:[Egg,Milk,Oil]
+[Pudding]:[Egg,Milk]
+[Pumpkin Pudding]:[Chicken Egg,Milk,Pumpkin]
+
+//No Utensils: 19 Recipes
+
+[Small Mayonnaise]:[Small Chicken Egg,Oil]
+[Medium Mayonnaise]:[Medium Chicken Egg,Oil]
+[Large Mayonnaise]:[Large Chicken Egg,Oil]
+[Salad]:[Cucumber OR Cabbage OR Tomato OR Carrot]
+[Sandwich]:[Tomato,Bread]
+[Sandwich]:[Cucumber,Bread]
+[Sandwich]:[Boiled Egg,Bread]
+//[Fruit Sandwitch]:[(Orange OR Banana OR Apple OR Strawberry OR Peach OR Pineapple),Bread]
+[Pickled Turnips]:[Turnip]
+[Pickled Cucumber]:[Cucumber]
+[Bamboo Rice]:[Bamboo Shoots,Riceballs]
+[Matsutake Rice]:[Matsutake,Riceballs]
+[Mushroom Rice]:[Shiitake,Riceballs]
+[Sushi]:[Sashimi,Riceballs]
+[Raisen Bread]:[Grape,Bread]
+[Sashimi]:[Medium Fish OR Large Fish]
+[Chirashi Sushi]:[Sashimi,Scrambled Eggs,Riceballs,Carrot]
+[Chirashi Sushi]:[Sashimi,Scrambled Eggs,Riceballs,Cucmber]
+[Chirashi Sushi]:[Sashimi,Scrambled Eggs,Riceballs,Pumpkin]
+[Buckwheat Chips]:[Buckwheat Flour]
+[Ice Cream]:[Milk,Egg]
+[RelaxTea Leaves]:[Blue Grass,Green Grass,Red Grass +Yellow Grass,Orange Grass,Indigo Grass,Purple Grass,a weed]
+[Elli Grass]:[Turbojolt XL,Bodigizer XL,burnt Frypan dish,burnt Pot dish,burnt Oven dish,burnt Mixer dish,burnt Steamer dish,burnt No Utensil dish]
