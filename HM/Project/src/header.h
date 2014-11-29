@@ -14,6 +14,7 @@ class fruit {
 	species ftype;
 public:
 	bool operator== (fruit B) {return (ftype == B.ftype && quality == B.quality);}
+	fruit (species type, level qual) {quality = qual; ftype = type;}
 };
 
 class plant {
@@ -28,6 +29,15 @@ public:
 	void water() {watered = true;}
 	void kill() {hasdied = true;}
 	bool age();
+	fruit* harvest () {
+		fruit* ret = new fruit (ptype, quality); 
+		maturity = 0; 
+		health = 0; 
+		quality = 0;
+		ptype = 0;
+		return ret;
+	}
+	
 };
 
 std::vector<plant> field;
@@ -57,17 +67,37 @@ public:
 
 
 class action {
-public:
-	virtual state execute ();
-};
-
-class Act_watercrop: public action {
-	CN_field position;
+protected:
 	character *cursor;
 public:
+	virtual state execute ()=0;
+	virtual bool hasaccess ()=0;
+	virtual bool hasmaterial () {return true;}
+	virtual void runaction () =0;
+};
+
+class action_fieldtarget: public action {
+protected:
+	CN_field position;
+public:
+	bool hasaccess () {return (cursor -> canaccess (position));}
 	state execute ();
 };
 
+class Act_watercrop: public action_fieldtarget {
+protected:
+public:
+	state execute ();
+	void runaction () {position.atcursor().water();}
+	bool hasmaterial () {return cursor->canwater();}
+};
 
+class Act_harvestcrop: public action_fieldtarget {
+public:
+	state execute ();
+	void runaction () {delete position.atcursor().harvest();}
+	
+	
+};
 
 

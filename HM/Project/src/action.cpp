@@ -1,10 +1,22 @@
 
-
-
+state action_fieldtarget::execute () {
+	if (!hasmaterial())
+		return 5;
+	if (hasaccess()) {
+		runaction();
+		return 1;//success
+	}
+	state ret = cursor -> givedestination (position, this);
+	if (ret == 1)
+		runaction();
+	return ret; //probably either in progress (0) or success (1)
+	
+}
+/*
 state Act_watercrop::execute() {
 	if (!cursor->canwater())
 		return 5;//no water
-	if (cursor->canaccess(position)) {
+	if (hasaccess()) {
 		position.atcursor().water();
 		return 1;//success
 	}
@@ -15,6 +27,22 @@ state Act_watercrop::execute() {
 	
 }
 
+state Act_harvestcrop::execute() {
+
+	if (!cursor->canwater())
+		return 5;//no water
+
+	if (hasaccess()) {
+		position.atcursor().water();
+		return 1;//success
+	}
+	state ret = cursor -> givedestination (position, this);
+	if (ret == 1)
+		position.atcursor().water();
+	return ret; //probably either in progress (0) or success (1)
+	
+}
+*/
 
 
 /*
@@ -43,3 +71,4 @@ state Act_watercrop::execute() {
  *	usage beyond this.
  *	
  */
+ 
