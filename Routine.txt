@@ -1,0 +1,164 @@
+
+NOTE ## This document is very disorderly, for the 
+time being it is a very messy glossary made only 
+to ensure that I don't forget the names of things. 
+
+A task is anything that a character is currently focussed on doing.
+
+A task is either 'primitive' or 'routine'.
+
+A primitive task is a single task programmed into the game, usually just an 
+action that manipulates some object over a short amount of time.
+
+A routine task is a list of other tasks to do in order, creating complicated 
+routine tasks.
+
+Routines are either static or dynamic:
+
+Static routine tasks are made of only primitive tasks, and/or other static 
+routine tasks.
+(Routine definitions cannot be circular or recursive, so this definition is 
+sufficient.)
+
+Dynamic routine tasks are the same except that they can also contain other 
+dynamic routine tasks, and dynamic operators.
+
+Dynamic operators represent all of the different things you can do with a 'for' 
+loop in basically any programming language. 
+(Things like while loops are achieved using goals, for safety)
+
+Routines can also be classified as either pure or impure.
+
+Any routine called from a pure routine must also be pure, whereas an impure 
+routine can call either.
+
+Purity is also dependant on what kinds of 'references' are used.
+
+A reference is the way that tasks know what objects they are dealing with.
+There are four kinds of reference:
+
+Explicit-
+Refers to a single object in the universe, wherever that object is.
+Of course this leads to problems if the object is destroyed, this is why 
+explicit references are only to be used in tasks that are currently being 
+executed.
+Any kind of reference can and must be evaluated into an explicit reference 
+before a task is executed.
+
+Dedication-
+Certain "roles" can be associated with objects in the game environment, or in 
+your inventory.
+These are for your routines to run without having explicit references programmed 
+into them. Things like your current tool, which can change due to circumstances, 
+but are otherwise reliably available to be used by your routines.
+
+Derivation-
+If you know certain properties of the object you are going to use, then instead 
+of manually selecting them to be associated with a task, you can have a routine 
+directly find an object suitable to use.
+This can be useful if for example you want to eat an apple, and you don't mind 
+which apple you want to eat; rather than manually selecting one for a 
+dedication, you can just have the routine derive an apple reference randomly, 
+or, say, according to freshness.
+User defined properties can also be made: in the case of the apples, you could 
+label apples as being important, so that they aren't automatically eaten (if you 
+set your routines to find an apple that is not 'important') should you wish to 
+deliver apples at a market or something of the like. This has many uses, and 
+makes derivation much more useful that dedication.
+
+Argument-
+Routines can and generally will take arguments, which are basically hypothetical 
+references.
+When a routine is used within another routine, references are associated with 
+each argument, and the sub-routine is 'evaluated' before the one containing it 
+is executed, with each access of the argument being replaced by the reference 
+associated with it.
+
+Arguments are the only one of these that is pure, any other reference will 
+render a routine impure, alongside any other routine that accesses it.
+
+
+
+
+Goals and Processes
+===================
+
+A goal is a set of requirements (or other goals) that relate to certain 
+conditions or needs of your gameplay.
+
+The requirements are based off of ideas such as possession or location, and can 
+be given routines to run should the requirements need to be met. 
+
+Characters can be told to work towards a certain goal, for example to fill spare 
+time in a constructive way, and this could possibly be set up to run at certain 
+times of the day (like watering your crops in the morning in Harvest Moon!) or 
+under conditions like idle timers (auto reload!) to create efficient and 
+controllably autonomous gameplay. (this is so that reduntant tasks run 
+automatically as a player loses touch with them, and idea which ought to be 
+central to such a divers and gritty idea for a simulator.)
+
+
+A process is an ordered set of goals, that can behave very much like goals, and 
+can also be specified as an action to complete in order to reach a goal (but no 
+circular definitions!) allowing for routine-like plans to be made that don't 
+necessarily expect all of the conditions to be met in one execution.
+
+NOTE ## what would be a convenient way to deal with 
+goals that have multiple ways of being met? Other 
+aspects to the routinery need to be sorted out 
+before this can be decided.
+
+OTHER NOTE ## Goals and processes are basically 
+just behaviour trees, but not strictly so...
+
+
+
+
+Flows or Something
+==================
+
+If this is the name I originally came up with then I don't like it, I want to 
+come up with a new one. (I know it started with an F)
+
+These are to represent conditional structures, they are designed to take an 
+object and determine what action to perform on the object based off of its 
+properties or labels.
+
+Auto-classification could be a possible usage of this.
+
+Properties of objects, or user defined labels would be an option, as well as 
+other more global things such as "am I currently hungry?", "do I already have an 
+apple?", "does my horse want an apple more than me?"
+
+
+
+
+Note on Autonomy
+================
+
+The goal of all of these things systems will ideally make the game possible to 
+play by simply creating (or maybe even downloading) automated processes and 
+routines for everything, and I feel that that is ideal in that I don't want 
+people to have to play any part of the game if they don't want to.
+
+The problem with this is that it makes it possible to succeed in the game 
+without actually controlling any part of it.
+For this reason the focus of game design should be about letting the player 
+discover new ground to explore and create plans for, and should be designed to 
+make any stable daily routine only able to reach a certain amount of success.
+
+ie. in order to continue through the game your daily routine should change, the 
+game is about adapting your plans to suit your growing and changing resources.
+eg. once you get some technology you were aiming for your plans become 
+impractical and a redesign is necessary if you are to reach the potential that 
+the technology provides.
+
+Also the game should be about efficiently creating and reaching goals, such as 
+sabotaging some major government authority or reaching a certain promotion in a 
+more legal way.
+
+
+
+
+
+
