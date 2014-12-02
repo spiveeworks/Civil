@@ -7,12 +7,16 @@
 // * Main.cpp * //
 // ** * * * * * //
 
-class fruit;
 class plant;
 struct CN_field;
 class character;
 
-struct fruitstack;
+// * * * * * * * * * //
+// * Inventory.cpp * //
+// * * * * * * * * * //
+
+class item;
+class fruit;
 
 // * * * * * * ** //
 // * Action.cpp * //

@@ -1,8 +1,10 @@
 #include <IOstream>
 #include <vector>
+#include <list>
 
 #include "header.h"
 
+#include "inventory.cpp"
 #include "action.cpp"
 
 
@@ -20,6 +22,16 @@ bool plant::age () {
 	return false;
 }
 
+fruit* plant::harvest () {
+	fruit* ret = new fruit (ptype, quality); 
+	maturity = 0; 
+	health = 0; 
+	quality = 0;
+	ptype = 0;
+	return ret;
+}
+
+/*
 struct fruitstack {
 	fruit base;
 	void (*flow)(fruit*);
@@ -51,6 +63,13 @@ class field {
 state character::givedestination (CN_field destiny, action *asker) {
 	location = destiny;
 	return 1;
+}
+
+bool character::storehand () {
+	if (hand == 0) 
+		return false; 
+	additem (inventory, *hand); 
+	return true;
 }
 
 
