@@ -1,0 +1,114 @@
+
+023C4965 THRU
+023C496B	FOUR
+
+023C4A25 THRU
+o23C4A2B	FOUR
+
+023CBA9D THRU
+023CBAA0	ONE
+
+023CDAFD THRU
+023CDB00	ONE
+
+023D4B25 THRU
+023D4B2B	FOUR
+
+
+023D4B65 THRU
+023D4B6B	FOUR
+
+
+023D83D9 THRU
+023D83DD	TWO
+
+
+
+
+
+
+
+
+Lumber:
+
+F3D7F3D6
+F3D9F3D8
+
+00003131
+00003131
+
+F3D7F3D6
+F3D9F3D8
+
+00009803
+
+
+
+Mat. Stone:
+
+F3F6F3F5
+F3F8F3F7
+
+00003131
+00003131
+
+
+F3F6F3F5
+F3F8F3F7
+
+00009903
+
+
+Twig:
+
+
+F3E3F3E2
+F3E5F3E4
+
+00003131
+00003131
+
+#
+#
+
+00008203
+
+
+
+
+
+AR:
+023C4968 F3E3F3E2
+023C4A28 F3E5F3E4
+223CBAA0 00003131
+223CBB00 00003131
+323D83DC 00008203
+
+	* * * * * * **
+	* Hitbox RAM *
+	** * * * * * *
+
+023CBAA0
+023CBAA1
+023CDB00
+023CDB01
+
+These indicate the top left, top right, bottom left and bottom right hit id values respectively. 00 for passable, 31 for impassable.
+
+Add two times the number of spaces right you want to move, and ninety six times the number of spaces down you want to move.
+
+	* Farm Map RAM *
+
+023C496B (WORD)
+023C4A2B (WORD)
+
+last of four bytes of information referring to the texture of the top left most tile on the farm.
+Shows top half and bottom half respectively. These halves can be broken up into bytes if desirable to show each quarter of the tile.
+
+Add four times the number of spaces right you want to move, and three hundred and eighty four times the number of spaces down you want to move.
+
+
+	* Farm Layout RAM *
+
+023D83DD
+

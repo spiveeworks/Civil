@@ -1,0 +1,56 @@
+RAM summary
+
+Rucksack:
+
+inventory slot (0,0)
+
+0x023B5AA8 and onwards (Rendering...)
+
+023D6B37 and onwards for actual inventory
+
+
+
+A0
+A1
+A2
+A3
+A4
+A5
+A6
+A7
+A8	Item Id
+A9	Item Class
+AA
+AB
+AC
+AD
+AE
+AF
+
+
+Rucksack Internal
+
+023D6B10 + 4*<slot id> + <partnum>
+
+slot id:
+
+0 - current tool
+1 - held item
+2 - equipped accessory
+
+3 thru 14 rucksack section A
+
+
+Partnum:
+
+0 - item id
+1 - misaligned
+2 - quality
+3 - quantity
+
+
+10 14 18
+
+1C 20 24
+
+28

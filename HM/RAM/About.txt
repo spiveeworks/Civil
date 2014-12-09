@@ -1,0 +1,28 @@
+Running Harvest Moon DS on the Desmume DS emulator, I have recently taken to 
+assembling my own cheats for the game, using data freezing methods;
+
+I plan on learning action replay properly (I read through a document once but 
+never actually played with anything)
+but for now, I'm just collecting memory references that will be useful should I 
+want to make cheats later; for the time being the memory adresses are still very 
+useful, as Desmume allows you to open up the games simulated memory, and manually 
+change values, (Tools -> View memory)
+meaning that I can by hand fabricate objects in my inventory, I also started to 
+learn manually editing the terrain, but it isn't useful enough to be worth 
+collecting the values for different tile types just yet, especially since it is 
+so much easier to give yourself a billion dollars.
+
+Anyways, the work I am doing is being documented in several text files, and so I 
+want to start uploading them to GitHub, I don't want to lose all of this already 
+wasted time.
+
+The work can be seen in this directory as a result.
+
+NOTE
+	The file containing actual action replay codes doesn't contain all of the 
+	things I am using in game (I'm not using any codes retrieved online, I 	just have a number of memory adresses that are useful to have recorded 	should I want to freeze them)
+	I only recently started the actual production of codes, and as of the 
+	time this about.txt is being written, the one action replay code is the 
+	only useful action replay I even have.
+		(I have another that makes a ghost twig appear in the left field 
+		near the mines.

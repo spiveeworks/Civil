@@ -1,0 +1,84 @@
+NOTE a very convenient (near your house) tile for testing ID values can be found in the memory here:
+023D8B4A
+
+Or if testing non-farm items, 
+023DAAB4
+is visible from the entrance to the mines.
+
+
+
+
+-------------
+-  0000 -Empty
+-  0001 -
+-  0002 -[four seed patches]
+-  0003 -Weed
+-  0004 -Water hole
+-  0005 -
+-  0006 -
+-  0007 -
+-  0008 -Ploughed field
+-  0009 -
+-  000A -
+-  000B -Home grown Weed
+-  000C -
+-  000D -
+-  000E -
+-  000F -
+-------------
+-  0010 -
+-  0011 -
+-  0012 -
+-  0013 -
+-  0014 -
+-  0015 -
+-  0016 -
+-  0017 -
+-  0018 -
+-  0019 -
+-  001A -
+-  001B -
+-  001C -
+-  001D -
+-  001E -
+-  001F -
+-------------
+
+
+-------------
+-  8200 -
+-  8201 -
+-  8202 -
+-  8203 -Twig
+-  8204 -
+-  8205 -
+-  8206 -
+-  8207 -
+-  8208 -
+-  8209 -
+-  820A -
+-  820B -
+-  820C -
+-  820D -
+-  820E -
+-  820F -
+-------------
+
+-------------
+- 03 00 -Weed
+- 03 01 -Stone
+- 03 02 -Twig
+- 03 03 -Stump [LT]
+- 03 04 -Rock [LT]
+- 03 05 -Boulder [LT]
+- 03 06 -Something (Moondrop)
+- 03 07 -
+- 03 08 -
+- 03 09 -
+- 03 0A -
+- 03 0B -
+- 03 0C -
+- 03 0D -
+- 03 0E -
+- 03 0F -
+-------------
