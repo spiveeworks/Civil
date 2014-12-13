@@ -1,0 +1,20 @@
+
+
+<local identifier>
+[Designated identifier]
+
+"Custom label / attribute"
+'non-custom label / attribute"
+
+(Specifications)
+{Specification set / label set}
+
+
+
+for all <Tiles> from <Ident A> to <Ident B>
+ -> -preform single action-
+
+let one such (Specification) be <New Ident>
+
+let associate of <object> be <New Ident>
+

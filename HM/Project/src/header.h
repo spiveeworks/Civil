@@ -90,7 +90,9 @@ public:
 //	bool operator== (fruit B) {return (ftype == B.ftype && quality == B.quality);}
 	fruit (species type, level qual) {quality = qual; ftype = type;}
 	unsigned itemclass() {return 4;}
+//significance being its "quality" attribute: how good the plant is
 	level itemsignificance() {return quality;}
+//subclass being its species
 	unsigned itemsubclass() {return ftype;}
 };
 
