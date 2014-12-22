@@ -1,12 +1,4 @@
-
-
-
-class character {
-public:
-	void crit_attack (character& target);
-	
-};
-
+/*
 enum bodyref {
 	P_null = 0,
 	P_head = 1, //part
@@ -28,12 +20,13 @@ enum bodyref {
 	P_right_calf,
 	P_right_foot
 };
+*/
 
-enum dirtype {
-	forward,
-	hook,
-	under,
-	upper,
+
+
+class character {
+public:
+	void crit_attack (character& target);
 	
 };
 
@@ -48,7 +41,7 @@ struct attackmanner {
 	bool upper () {return (num / 4) == 0;}
 	bool lower () {return (num / 4) == 1;}
 	bool alternate () {return (num / 4) == 2;}
-	
+
 	char portion () {
 		switch (num / 4) 
 		{
@@ -60,15 +53,12 @@ struct attackmanner {
 				return 'A';
 		}
 	}
+
 	attackmanner () {num = 0;}
+	attackmanner (const unsigned& num0) {num=num0;}
+	attackmanner (const attackmanner& that) {num = that.num;}
 };
 
-
-
-struct attack {
-	character *ab, *ad;
-	unsigned manner;
-};
 
 
 #include <IOstream>
@@ -86,7 +76,6 @@ int main () {
 		std::cout << "\t" << via.num;
 		std::cout << "\r\n";
 	}
-	std::cout << "true == " << (true ? "true" : "false");
 	return 0;
 }
 
