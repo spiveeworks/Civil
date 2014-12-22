@@ -1,0 +1,39 @@
+
+~ LEADERSHIP ~
+
+Exile
+Vigilante
+
+~ Task ~
+
+Rogue
+Thief
+
+~ Activity ~
+
+Delinquent
+Sceptic
+
+~ Special ~
+
+Fraud
+Assassin
+
+
+
+
+~ Knowledge/Deception ~
+
+Traitor
+Forger
+
+~ CONSTRUCTION ~
+
+Peacemaker
+Tinkerer
+
+~ LONER ~
+
+Hermit
+Outcast
+
