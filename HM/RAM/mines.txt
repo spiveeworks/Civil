@@ -1,0 +1,20 @@
+Mines
+
+
+
+
+023B0800 - hitmap
+
+023AFB10 - Graphical Map
+
+023D4AA0 - unknown, corresponds to Graphical Map
+
+023D499D - unknown
+
+023D499D
+
+
+CONCLUSION
+
+The mines seem to be handled by a dynamic memory allocation;
+they are therefore not worth figuring out until I learn what the capabilities of AR are exactly.

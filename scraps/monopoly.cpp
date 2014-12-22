@@ -1,0 +1,7 @@
+
+class square {
+	unsigned index;
+};
+
+
+

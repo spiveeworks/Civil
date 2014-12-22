@@ -1,0 +1,8 @@
+"scraps" is a place where I shall think in the form of code, assembling small, 
+functional, arbitrary C++ source code.
+
+It will do little things and I shall hopefully begin assembling little things 
+out of them, but nothing usable will exist for a long time.
+
+I'm just making things that can be pulled into an actual program in the future.
+

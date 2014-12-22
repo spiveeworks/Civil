@@ -1,0 +1,40 @@
+
+
+Front
+Back
+
+Straight
+Curved
+
+Upper
+Lower
+Alternate
+
+
+
+UFS	-	Jab
+UFC	-	Hook
+UBS	-	Cross
+UBC	-	Swing Hook
+LFS	-	Belly Tap
+LFC	-	Hammer
+LBS	-	Under Cut
+LBC	-	Upper Cut
+AFS	-	Crescent Kick
+AFC	-	Outer Crescent Kick
+ABS	-	Round House
+ABC	-	Hook Kick
+
+
+Defense;
+
+Block
+Avoid
+
+Up
+Down
+Left
+Right
+Centre
+
+
