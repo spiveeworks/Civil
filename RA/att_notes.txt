@@ -1,7 +1,7 @@
 
 
-Front
-Back
+Front (light/weak hand)
+Back (heavy/armed hand)
 
 Straight
 Curved
@@ -38,3 +38,42 @@ Right
 Centre
 
 
+
+
+
+
+:: Fighting Styles ::
+
+
+.Assassin.
+
+UFS	-	Strike Head
+UFC	-	Hook Head
+UBS	-	Strike Neck
+UBC	-	Hook Neck
+LFS	-	Palm Chest
+LFC	-	Strike Chin
+LBS	-	Strike Gut
+LBC	-	Strike Chest
+AFS	-	Groin Kick
+AFC	-	Push Kick
+ABS	-	Stomp Leg
+ABC	-	Stomp Foot
+
+Block - Defensive Strike, " , "
+Dodge - Duck, step back, side step
+
+.Fraud.
+
+UFS	-	simple feint
+UFC	-	tap ear
+UBS	-	Strike Neck
+UBC	-	Hook Neck
+LFS	-	Palm Chest
+LFC	-	Strike Chin
+LBS	-	Strike Gut
+LBC	-	Strike Chest
+AFS	-	Groin Kick
+AFC	-	Push Kick
+ABS	-	Stomp Leg
+ABC	-	Stomp Foot
