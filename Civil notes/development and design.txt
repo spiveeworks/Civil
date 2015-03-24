@@ -1,0 +1,15 @@
+################################################################################ # ############################################################################ #
+
+
+THINGS TO ASK MYSELF:
+
+Will it work in an automated simulation? (forecastable, low memory 
+~	requirements, (as things may change and so intermediate information needs 
+~	to be stored) easily recordable, objective and concrete)
+
+Is there an alternative for players when their associates aren't using this 
+~	feature as they should? (partner doesn't include a reward, so you modify 
+~	for its inclusion.)
+	Does it function effectively without allowing for the manipulation of said 
+	~	associate.
+

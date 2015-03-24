@@ -1,0 +1,68 @@
+
+Goal:
+
+A particular condition such as possession or environment which is desired and 
+may or may not be met at a given time;
+
+Action:
+
+A planned path to reaching a goal, that may work parallel to other actions, or 
+may be the only known way of reaching a goal.
+An action is defined by:
+
+1.	The 'result', the goal that should be met by the completion of the action; 
+(may be multiple results, such as by-products)
+2.	A set of 'mediators', goals which must be met before the result is even 
+possible.
+3.	An 'execution', a specific task or routine which turns the mediator 
+conditions into the result condition.
+
+
+
+Goal tree:
+
+A goal can be turned into a 'goal tree' by choosing an available action that 
+could result in the goal's completion, and by branching the goal out into its 
+'sub-goals', its mediators, and then repeating on those until eventually all 
+unbranched goals are either already met, or independent, eg:
+
+
+Goal Have Hat; resultant from craft hat:
+	Goal Have needle; currently met;
+	Goal Have bacon; resultant from buy bacon:
+		Goal Have money; resultant from sell fabric:
+			Goal Have fabric; currently met;
+			Goal Have fabric buyer; currently met; ##  In order to provide 
+			~  player with an opportunity to choose which buyer to sell to, 
+			~  allowing for robust automation
+		Execute;
+	Execute;
+Execute;
+
+Note that goals relating to owning specific objects are met by a different 
+method, called "agent method".
+
+
+Selector Method:
+
+Selector methods assemble goal trees by choosing the actions ideal for gelling 
+goals together.
+The simplest selector method just requests that the player choose an action, or 
+perhaps even make one if necessary.
+
+
+Agent Method:
+
+Agent methods are a class of selector method that deal with choosing between 
+available objects and interfaces to meet goals through a simple action along 
+the lines of:
+
+Goal Have X; resultant from select X:
+	Goal Own an X; already met;
+Execute; ## Go and get it, end of story.
+
+Like other selector methods, the simplest selector method just asks the player 
+to choose from known/owned objects and interfaces to collect.
+
+
+
