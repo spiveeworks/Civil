@@ -1,5 +1,13 @@
+#include <Civil/Space.h>
+#include <Civil/Event.h>
+#include <Civil/EventObjects.h>
+#include <Civil/Entity.h>
+
+#include "EntityDerivs.h"
+
 #include <map>
-#include <civil.h>
+#include <vector>
+#include <IOstream>
 
 using namespace std;
 
@@ -10,29 +18,29 @@ std::vector<std::string> noun_map =
     "water",
 };
 
+void HM_Human::Show(SpaceIndex location, Image image)
+{
+    if (image)
+        cout << "You see a " << noun_map[image];
+}
+
 int main()
 {
+    HM_Human player;
     Space world;
-    map<RID_t, RenderEntity*> names;
+    EventQueue action;
+    
+    world.AddEntity(action, new HM_Plant());
     
     string input = "";
     while (input.substr(0,4) != "exit")
     {
         input = "";
         while (input == "") getline(cin, input);
-        switch(input.cstr())
+        if (input == "look")
         {
-            case "look":
-            {
-                for (auto everything = world.begin(); everything != world.end(); ++everything)
-                {
-                    cout << names.at((*everything).Species.RID()) << endl;
-                }
-            }
-            break;
+            world.SeeAll (action, player);
         }
     }
-
-
 }
 

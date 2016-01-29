@@ -1,24 +1,26 @@
+#include <Civil/Space.h>
+#include <Civil/Entity.h>
+#include <Civil/EventObjects.h>
+
 // ******************** //
 // * Container Things * //
 // ******************** //
 
-Entity* Space::withdraw (SpaceIterator const &it)
+Entity* Space::withdraw (SpaceIndex const &index)
 {
-    if (it.under == ents.end()) return nullptr;
+    auto it = ents.find(index);
+    if (it == ents.end()) return nullptr;
     Entity* ret = it->second;
     ents.erase(it);
     return ret;
 }
 
-SpaceIterator Space::deposit (EntityReference const &toad) // hints? return an iterator? with hints?
+SpaceIndex Space::deposit (Entity *toad) // hints? return an iterator? with hints?
 {
     SpaceIndex ret = next++;
-    if (toad.ptr()) 
-    {
-        ents[ret]=toad.ptr();
-        return --ents.end();
-    }
-    return ents.end();
+    if (toad) 
+        ents[ret]=toad;
+    return ret;
 }
 
 Entity* Space::operator[] (SpaceIndex at) 
@@ -27,42 +29,24 @@ Entity* Space::operator[] (SpaceIndex at)
     return (it == ents.end()) ? nullptr : it->second;
 }
 
-void Space::destroy (SpaceIndex at)
+void Space::Destroy (EventQueue &action, SpaceIndex at)
 {
-    auto it = e
-    delete remove(at);
+    Disappear (action, at);
+    delete withdraw(at);
 }
 
-SpaceIndex Space::addEntity (EventQueue &action, EntityReference const &toad)
+SpaceIndex Space::AddEntity (EventQueue &action, Entity *toad)
 {
-    appear(watch, )
-    SpaceIndex ret = next++;
-    if (toad.ptr()) 
-    {
-        map[ret]=toad.ptr();
-    }
+    SpaceIndex ret = deposit (toad);
+    if (toad)
+        Appear(action, ret);
     return ret;
 }
 
-SpaceIndex Space::TakeFrom (EventQueue &action, Space &from, SpaceIndex where_from)
+SpaceIndex Space::GiveTo (EventQueue &action, Space &to, SpaceIndex where_from)
 {
-    where_to = next++;
-    auto it_from = ents.find(where_from);
-    from.disappear(watch, it_from);
-    toad = from.withdraw(where_from);
-    if (toad)
-        ents[where_to] = toad;
-    return where_to;
-}
-
-SpaceIndex Space::GiveTo (EventQueue &action, Space &to, SpaceIterator it_from)
-{
-    where_to = next++;
-    disappear(watch, it_from);
-    toad = from.withdraw(it_from);
-    if (toad)
-        ents[where_to] = toad;
-    return where_to;
+    Disappear(action, where_from);
+    return to.AddEntity(action, withdraw(where_from));
 }
 
 // ********************** //
@@ -74,10 +58,32 @@ void Space::SeeAll (EventQueue &action, Entity &seer)
     ObserveOrgan eye_type = seer.Eyes();
     for (auto thing: ents)
     {
-        Image img = thing->second->render(eye_type);
+        Image img = thing.second->render(eye_type);
         if (img)
         {
-            action.QueueEvent(new SeeEvent {thing->first,img,&seer});
+            action.QueueEvent(new EventObjects::SeeEvent {thing.first,img,&seer});
         }
+    }
+}
+
+void Space::Appear (EventQueue &action, SpaceIndex seen_at) //invisible things will still attempt to show themselves to every object
+{
+    Entity* seen = operator[](seen_at);
+    for (auto thing: ents)
+    {
+        Image img = seen->render(thing.second->Eyes());
+        if (img)
+            action.QueueEvent(new EventObjects::SeeEvent {seen_at, img, thing.second});
+    }
+}
+
+void Space::Disappear (EventQueue &action, SpaceIndex seen_at) //oops implementtwice
+{
+    Entity* seen = operator[](seen_at);
+    for (auto thing: ents)
+    {
+        Image img = seen->render(thing.second->Eyes());
+        if (img)
+            action.QueueEvent(new EventObjects::UnseeEvent {seen_at, img, thing.second});
     }
 }
