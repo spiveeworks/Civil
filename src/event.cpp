@@ -16,21 +16,30 @@ void EventQueue::QueueEvent (Event* toque, time how_long) //equivalent to QueueE
         future.push(WhenEvent{current_time + how_long, toque});
 }
 
-bool EventQueue::doNext() 
+bool EventQueue::DoEvent() 
 {
     if (present.empty())
-    {
-        if (future.empty()) return false;
-        current_time = future.top().when;
-        while(future.top().when == current_time)
-        {
-            present.push(future.top().what);
-            future.pop();
-        }
-    }
+        if (!future.empty() && future.top().when == current_time)
+            MoveOn();
+        else
+            return false;
     while(present.front()->IsAborted())
         DeleteCurrentEvent(); //pop away all the aborted events
     present.front()->Execute(*this);
     DeleteCurrentEvent(); //done and dusted
     return true;
+}
+
+time EventQueue::MoveOn()
+{
+    if (!present.empty())
+        return 0;
+    time past_time = current_time;
+    current_time = future.top().when;
+    while(future.top().when == current_time)
+    {
+        present.push(future.top().what);
+        future.pop();
+    }
+    return current_time - past_time;
 }

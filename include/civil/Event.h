@@ -47,5 +47,8 @@ private:
 public:
     void QueueEvent (WhenEvent const &toque);
     void QueueEvent (Event* toque, time how_long = 0);
-    bool doNext();
+    bool DoEvent();
+    time MoveOn();
+    bool Empty()
+        {return present.empty() && future.empty();}
 };

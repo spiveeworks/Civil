@@ -21,7 +21,7 @@ std::vector<std::string> noun_map =
 void HM_Human::Show(SpaceIndex location, Image image)
 {
     if (image)
-        cout << "You see a " << noun_map[image];
+        cout << "You see a " << noun_map[image] << endl;
 }
 
 int main()
@@ -30,16 +30,27 @@ int main()
     Space world;
     EventQueue action;
     
+    world.AddEntity(action, &player);
     world.AddEntity(action, new HM_Plant());
     
     string input = "";
     while (input.substr(0,4) != "exit")
     {
+        if (action.Empty())
+            cout << "Nothing Happens" << endl;
+        else
+            while (action.DoEvent());
+                //do nothing, the events handle themselves
         input = "";
         while (input == "") getline(cin, input);
         if (input == "look")
         {
             world.SeeAll (action, player);
+        }
+        else if (input == "wait" && !action.Empty())
+        {
+            time waited = action.MoveOn();
+            cout << "Waited for " << waited << " units time." << endl;
         }
     }
 }
