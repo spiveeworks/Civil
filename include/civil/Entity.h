@@ -3,14 +3,16 @@
 
 class Entity {
 public:
-    //note: Eyes() must be overwritten before any entities need reveal themselves
-    virtual void Show(SpaceIndex location, Image image) 
-        {}; 
+    virtual ~Entity () {}
+    
     virtual Image render (ObserveOrgan const &seer) 
         {return NULLIMG;} //note: invisible by default
     virtual ObserveOrgan Eyes() 
         {return NULLORGN;}//blind by default
-    virtual ~Entity () {}
+        
+    //note: Eyes() must be overwritten before any entities need reveal themselves
+    virtual void Show(SpaceIndex location, Image image, EyesWhy detail) 
+        {}; 
 };
 
 /*
@@ -19,3 +21,9 @@ public:
  * once entities are dynamically defined render() will also need to belong to species, with entities being passed to the species
  * this applies to any object-specific behaviour (basically all object behaviour)
  */
+
+struct Grasper {
+    Entity *grasp;
+    virtual GrasperOrgan type() const
+        {return NULLGRASP;}
+};

@@ -13,11 +13,12 @@ struct SeeEvent: public Event
 {
     SpaceIndex where;
     Image what;
+    EyesWhy why;
     Entity* whom;
     
     void Execute(EventQueue& action);
-    SeeEvent (SpaceIndex where_c, Image what_c, Entity* whom_c):
-        where(where_c), what(what_c), whom(whom_c)
+    SeeEvent (SpaceIndex where_c, Image what_c, EyesWhy why_c, Entity* whom_c):
+        where(where_c), what(what_c), why(why_c), whom(whom_c)
         {}
 };
 //maybe make a batch alternative so that looking doesn't cause event spam
@@ -25,16 +26,5 @@ struct SeeEvent: public Event
  // but this complicates things if vision is possible beyond current spaces
  // maybe something that uses entity iterators of some kind
  // but that's templatey and events are polymorphicy
-
-struct UnseeEvent: public SeeEvent
-{
-    void Execute (EventQueue& action) {} // crying
-    UnseeEvent (SpaceIndex where_c, Image what_c, Entity* whom_c):
-        SeeEvent (where_c, what_c, whom_c)
-        {}
-};
-
-
-
 
     }

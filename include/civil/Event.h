@@ -37,7 +37,7 @@ private:
     future_queue_type future;
     typedef std::queue<Event*> present_queue_type;
     present_queue_type present;
-    time current_time;
+    time current_time = 0;
     
     void DeleteCurrentEvent() 
     {
