@@ -1,0 +1,8 @@
+#pragma once
+
+typedef signed long time;
+class EventQueue;
+class Event;
+typedef std::pair<time, Event*> ChildEvent;
+constexpr ChildEvent END_CHAIN = ChildEvent{0, nullptr};
+//namespace?

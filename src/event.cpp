@@ -1,33 +1,30 @@
 #include <Civil/Event.h>
 
-void EventQueue::QueueEvent (WhenEvent const &toque)
+void EventQueue::QueueEvent (Event* toque, time how_long) //equivalent to QueueEvent(WhenEvent{current_time + how_long, toque})
 {
-    if (toque.when <= current_time)
-        present.push(toque.what);
-    else
-        future.push(toque);
-}
-
-void EventQueue::QueueEvent (Event* toque, time how_long) //equivalent to QueueEvent({current_time + how_long, toque})
-{
+    if (!toque)
+        return;
     if (how_long <= 0)
         present.push(toque);
     else
         future.push(WhenEvent{current_time + how_long, toque});
 }
 
-bool EventQueue::DoEvent() 
+void EventQueue::DoEvent() 
 {
-    if (present.empty())
-        if (!future.empty() && future.top().when == current_time)
+    if (present.empty() && !future.empty())
+    //    if (!future.empty() && future.top().when == current_time) // this should always be false
             MoveOn();
-        else
-            return false;
-    while(present.front()->IsAborted())
+    //    else
+    //        return false;
+    while(present.front()->isAborted())
         DeleteCurrentEvent(); //pop away all the aborted events
-    present.front()->Execute(*this);
+    
+    auto next = present.front()->Execute(); // execute the current event and 
+    QueueEvent(next.second, next.first); // queue the requested next event.
     DeleteCurrentEvent(); //done and dusted
-    return true;
+    
+    //return true;
 }
 
 time EventQueue::MoveOn()
@@ -36,10 +33,11 @@ time EventQueue::MoveOn()
         return 0;
     time past_time = current_time;
     current_time = future.top().when;
-    while(future.top().when == current_time)
+    while(!future.empty() && future.top().when == current_time)
     {
         present.push(future.top().what);
         future.pop();
     }
     return current_time - past_time;
 }
+

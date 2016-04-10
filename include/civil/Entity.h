@@ -1,7 +1,15 @@
 #pragma once
-#include "EntitySignals.h"
+#include <utility>
 
-class Entity {
+#include "EntitySignals.h"
+typedef signed long time;
+class Space;
+typedef unsigned char SpaceIndex;
+
+#include "Event.forward"
+
+class Entity 
+{
 public:
     virtual ~Entity () {}
     
@@ -11,8 +19,10 @@ public:
         {return NULLORGN;}//blind by default
         
     //note: Eyes() must be overwritten before any entities need reveal themselves
-    virtual void Show(SpaceIndex location, Image image, EyesWhy detail) 
+    virtual void Show(Space& place, SpaceIndex location, Image image, EyesWhy detail) 
         {}; 
+    virtual ChildEvent React(Space& place) // need a broader name 
+        {return END_CHAIN;};
 };
 
 /*
@@ -22,7 +32,8 @@ public:
  * this applies to any object-specific behaviour (basically all object behaviour)
  */
 
-struct Grasper {
+struct Grasper 
+{
     Entity *grasp;
     virtual GrasperOrgan type() const
         {return NULLGRASP;}

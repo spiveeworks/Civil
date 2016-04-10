@@ -1,30 +1,50 @@
 #pragma once
-#include "Event.h"
+#include <vector>
 
+#include "Event.h"
 #include "EntitySignals.h"
 typedef unsigned char SpaceIndex;
+typedef std::pair<SpaceIndex, Image> Sight;
 
 class Entity;
+class Space;
+
 
 namespace EventObjects
     {
 
-struct SeeEvent: public Event
+struct See: public Event
 {
+    Space& world;
     SpaceIndex where;
-    Image what;
+    Entity& who;
     EyesWhy why;
-    Entity* whom;
+    Image what;
     
-    void Execute(EventQueue& action);
-    SeeEvent (SpaceIndex where_c, Image what_c, EyesWhy why_c, Entity* whom_c):
-        where(where_c), what(what_c), why(why_c), whom(whom_c)
+    ChildEvent Execute();
+    See (Space& world_c, SpaceIndex where_c, Entity& who_c, EyesWhy why_c);
+};
+
+struct SeeAll: public Event
+{
+    Space& world;
+    Entity& who;
+    EyesWhy why;
+    std::vector<Sight> what;
+    
+    ChildEvent Execute();
+    SeeAll (Space& world_c, Entity& who_c, EyesWhy why_c);
+};
+
+struct Sleep: public Event
+{
+    Space& where;
+    Entity& self;
+    
+    ChildEvent Execute();
+    Sleep (Space& where_c, Entity& self_c):
+        where(where_c), self(self_c)
         {}
 };
-//maybe make a batch alternative so that looking doesn't cause event spam
- // by having an event that references a space and just asks the space then and there
- // but this complicates things if vision is possible beyond current spaces
- // maybe something that uses entity iterators of some kind
- // but that's templatey and events are polymorphicy
 
     }
