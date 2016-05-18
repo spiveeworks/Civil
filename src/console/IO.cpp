@@ -69,7 +69,7 @@ void TextInput::Cancel(Space& where, Entity& self)
 
 ChildEvent TextInput::React(Space& world, Entity& self) // note this is not python
 {
-    need_input = false;
+    need_input = true; // set to false to make action interruptible
     doing = nullptr;
     time when = reaction_time;
     
@@ -91,19 +91,23 @@ ChildEvent TextInput::React(Space& world, Entity& self) // note this is not pyth
         {
             action->QueueEvent(new EventObjects::SeeAll {world, self, INTERNAL});
             doing = new EventObjects::Sleep {world, self};
-            need_input = true;
         }
-        /*
+        else if (input == "drop")
+        {
+            world.TakeFrom(*self.GetComponent(0));
+            doing = new EventObjects::Sleep{world, self};
+        }
         else if (input.substr(0, 5) == "grab ") // NYI, queues an event that attempts to disappear an object
         {
-            Image target = std::find(noun_map.begin(), noun_map.end(), input.substr(5)); // convert the text after "grab " into a visual description
+            Image target = interpret(input.substr(5)); // convert the text after "grab " into a visual description
             SpaceIndex loc = findFirst(target); // gets the first object location associated with the desired description
-            world.Grab(self.Hand(), loc); // queues an event to attempt the grabbery, syntax uncomfirmed
-        }*/
+            doing = new EventObjects::Contact{world, self, GRAB, loc, 0};
+        }
         else if (input == "wait" && !action->isEmpty()) // waits for ten times the reaction time of the person, but still allowing for interruptions by input.
         {
             doing = new EventObjects::Sleep{world, self};
             when *= 10;
+            need_input = false;
         }
     }
     return ChildEvent{when, doing};
@@ -138,21 +142,22 @@ void TextOutput::VisualUpdate(SpaceIndex loc, Image desc, EyesWhy detail)
             << std::endl; 
     }
     if (!IsHere(detail)) desc = NULLIMG;
-    Update(loc, desc);
+    Update(loc, IsHere(detail) ? desc : NULLIMG);
 }
 
-void TextOutput::GrabUpdate(SpaceIndex loc, bool success)
+void TextOutput::TouchUpdate(Touch signal, bool did_grab)
 {
-    std::cout << "You grab the "
-        << name(getImage(loc))
-        << (success
-        ? " and pick it up."
-        : " but can't lift it.")
-        << std::endl;
-    if (success)
-    {
-        holding = getImage(loc);
-        Update(loc, NULLIMG);
-    }
+    if (signal == NULLTOUCH)
+        std::cout << "There is nothing there?!"
+            << std::endl;
+    else if (signal == GRABBED)
+        std::cout << "You grab it "
+            << (did_grab
+            ? "and pick it up."
+            : "but can't lift it.")
+            << std::endl;
+    else
+        std::cout << "You touch it. "
+            << std::endl;
 }
 

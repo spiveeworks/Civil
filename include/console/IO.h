@@ -22,7 +22,7 @@ protected:
     Image getImage (SpaceIndex where) const;
     
     void Update (SpaceIndex where, Image what)
-        {if (what) sights[where]=what; else sights.erase(what);}
+        {if (what) sights[where]=what; else sights.erase(where);}
     Image holding;
     
 };
@@ -41,7 +41,7 @@ protected:
     bool need_input = true; // if this is true then Cancel does nothing, as the current event has already been cancelled
     time reaction_time = 100;
 public:
-    void Cancel(Space& where, Entity& self);
+    void Cancel(Space& where, Entity& self); // asks user if they want to cancel what they are doing, based on previous input.
     ChildEvent React(Space& place, Entity& self);
 };
 
@@ -49,7 +49,7 @@ class TextOutput: public virtual IOSight, public virtual IOLang {
     static std::vector<std::string> explanation_map;
 public:
     void VisualUpdate(SpaceIndex loc, Image desc, EyesWhy detail);
-    void GrabUpdate(SpaceIndex loc, bool success);
+    void TouchUpdate(Touch signal, bool did_grab);
 };
 
 struct TextIO: public TextInput, public TextOutput {

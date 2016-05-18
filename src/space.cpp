@@ -85,45 +85,45 @@ std::vector<Sight> SpaceTransmit::getAllImages (Entity& seer) const
 
 extern EventQueue* action;
 
-//inline void VisualUpdate(Space* world, EyesWhy why, Entity* )
-
-void Space::Destroy (SpaceIndex at)
-{
-    Entity* todo = operator[](at);
-    if (!todo)
-        return;
-    for (auto each: ents)
-        if (each.first != at)
-            action->QueueEvent(new EventObjects::See{*this, at, *each.second, DISAPPARITION});
-    delete withdraw(at); // this is NOT safe, any thing this object was doing will now be undefined; I need to have objects delete themselves and/or use events for deletion to be safe
-}
-
-SpaceIndex Space::AddEntity (Entity *toad, bool already_existed)
+SpaceIndex Space::AddEntity (Entity *toad, EyesWhy why_seen)
 {
     SpaceIndex ret = deposit (toad);
     if (!toad)
         return ret;
-    action->QueueEvent(new EventObjects::SeeAll{*this, *toad, already_existed ? UNBLOCKED : INTERNAL});
+    action->QueueEvent(new EventObjects::SeeAll{*this, *toad, why_seen == APPARITION ? INTERNAL : UNBLOCKED});
     for (auto each: ents) // implement twice
         if (each.first != ret)
-            action->QueueEvent(new EventObjects::See{*this, ret, *each.second, already_existed ? ENTRANCE : APPARITION});
+            action->QueueEvent(new EventObjects::See{*this, ret, *each.second, why_seen});
     return ret;
+}
+
+Entity* Space::RemoveEntity (SpaceIndex at, EyesWhy why_unseen)
+{
+    Entity *todo = operator[](at);
+    if (!todo) // I'm not sure if I should wrap the loop in this if instead
+        return nullptr;
+    action->QueueEvent(new EventObjects::SeeAll{*this, *todo, BLOCKED});
+    for (auto each: ents)
+        if (each.first != at)
+            action->QueueEvent(new EventObjects::See{*this, at, *each.second, why_unseen});
+    withdraw(at); // withdraw later since it needs to be in the space while the visual events are queued
+    return todo;
 }
 
 SpaceIndex Space::GiveTo (Space &to, SpaceIndex where_from)
 {
-    Entity *todo = operator[](where_from);
-    if (!todo)
-        return to.AddEntity(nullptr); // I'm not sure if I should wrap the loop in this if instead, but it breaks implement-once so it won't matter when that is fixed
-    action->QueueEvent(new EventObjects::SeeAll{*this, *todo, BLOCKED});
-    for (auto each: ents) // implement thrice
-        if (each.first != where_from)
-            action->QueueEvent(new EventObjects::See{*this, where_from, *each.second, VACATION});
-    return to.AddEntity(withdraw(where_from), true);
+    Entity *todo = RemoveEntity(where_from, VACATION);
+    return to.AddEntity(todo, ENTRANCE);
 }
-/*
-void Space::GiveTo (Grasper &to, SpaceIndex where_from)
+
+SpaceIndex Space::GiveTo (Component& to, SpaceIndex where_from)
 {
-    VisualUpdate(where_from, CONSUMPTION);
-    to.grasp = withdraw(where_from);
-}*/
+    Entity *todo = RemoveEntity(where_from, CONSUMPTION);
+    return AddEntity(to.SwapContent(todo), PLACEMENT);
+}
+
+SpaceIndex Space::TakeFrom (Component& from)
+{
+    return AddEntity(from.SwapContent(nullptr), PLACEMENT);
+}
+

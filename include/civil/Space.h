@@ -5,6 +5,7 @@
 #include <Civil/EntitySignals.h>
 
 class Entity;
+class Component;
 class EventQueue;
 
 typedef unsigned char SpaceIndex;
@@ -42,11 +43,16 @@ public:
 class Space: public SpaceTransmit 
 {
 public:
-    void Destroy (SpaceIndex at); // queues an event for an object to disappear, and then for the object to be deleted
-    SpaceIndex AddEntity (Entity *toad, bool already_existed = false); // adds an object to the space and then queues an event for it to appear
-    SpaceIndex GiveTo (Space &to, SpaceIndex where_from); // removes from here, queues disappear, and then puts in another space, queueing appear
+    //void Destroy (SpaceIndex at); // queues an event for an object to disappear, and then for the object to be deleted
+    //at the moment 'destroying' objects can be done by delete RemoveEntity(at, DISAPPARITION)
+    SpaceIndex AddEntity (Entity *toad, EyesWhy why_seen = APPARITION); // adds an object to the space and then queues relevant events for it to appear visually
+    Entity* RemoveEntity (SpaceIndex at, EyesWhy why_unseen = DISAPPARITION); // pops an object from the space and then queues relevant events for it to disappear visually
+    SpaceIndex GiveTo (Space &to, SpaceIndex where_from); // removes an entity from here and adds it to another space using above methods (thus the object will visually disappear and reappear from the respective spaces)
     SpaceIndex TakeFrom (Space &from, SpaceIndex where_from) // opposite of GiveTo() :P
         {return from.GiveTo(*this, where_from);}
+    
+    SpaceIndex GiveTo (Component &to, SpaceIndex where_from); //Take an entity out of the space, put it in the component, queue visual events, and then effectively run TakeFrom() with the previous content of the component 
+    SpaceIndex TakeFrom (Component &from); // remove the contents of the component and add it to the space, queueing visual events
     
     void Debug();
 };

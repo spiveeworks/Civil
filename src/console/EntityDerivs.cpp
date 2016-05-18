@@ -10,3 +10,15 @@ void Human::Show(Space& place, SpaceIndex location, Image image, EyesWhy detail)
 ChildEvent Human::React (Space& place)
     {return mind->React(place, *this);}
 
+ChildEvent Human::GrabReact (Space& place, Touch signal)
+{
+    mind->TouchUpdate(signal, true);
+    return React(place);
+}
+
+ChildEvent Human::TouchReact (Space& place, Touch signal)
+{
+    mind->TouchUpdate(signal, false);
+    return React(place);
+}
+

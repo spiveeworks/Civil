@@ -57,3 +57,4 @@ public:
     EventQueue(EventQueue const &) = delete;
     EventQueue() = default;
 };
+

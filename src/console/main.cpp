@@ -27,7 +27,7 @@ int main()
     {
         "nothing", //0 is nothing derr
         "plant", //1
-        "water", //2
+        "seed", //2
     };
     
     Human player(console); // the user's entity object.
@@ -35,6 +35,7 @@ int main()
 
     world.AddEntity(&player); // put the player's reference in the world
     world.AddEntity(new Plant()); // put a generic object into the world (Instances of Plant look like 1: "plant")
+    world.AddEntity(new Seed()); // put a generic object into the world (Instances of Seed look like 2: "seed")
     
     running = true;
     action->QueueEvent(new EventObjects::Sleep{world, player}); // triggers the input/execute cycle of the player
