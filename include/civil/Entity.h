@@ -26,9 +26,9 @@ public:
         
     //note: Eyes() must be overwritten before any entities need reveal themselves
     virtual void Show(Space& place, SpaceIndex location, Image image, EyesWhy detail) 
-        {}; 
+        {}
     virtual ChildEvent React(Space& place) // need a broader name 
-        {return END_CHAIN;};
+        {return END_CHAIN;}
     
     virtual Touch TouchReaction(Touch signal) 
         {return NULLTOUCH;}
