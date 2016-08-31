@@ -12,69 +12,147 @@ class EntityClass
 
 typedef byte penum;
 
-struct Property 
+class PropertyFormat 
+{
+	typedef std::pair<byte, byte> element;
+	typedef std::vector<element> format_type;
+	typedef std::vector<PropertyFormat*> family_type;
+	typedef format_type::size_type index
+	
+	PropertyFormat const &parent;
+	index parent_index;
+	
+	format_type format;
+	std::map<index, family_type> family_lines;
+	
+	PropertyFormat* child (index line_index, byte child_id)
+	{
+		auto family_it = family_lines.find(line_index);
+		return (family_it == family_lines.end()) ? nullptr :family_it->second[child_it];
+	}
+};
+
+struct Property
 {
 	typedef std::vector<byte> data_type;
-	std::map<byte,data_type> data;
+	typedef PropertyFormat::index index;
+	std::map<PropertyFormat*, data_type> data;
 	
-	class iterator
+	class iterator: public std::iterator<std::bidirectional_iterator, byte>
 	{
-		PropertyTemplate const &format;
-		Property& property;
-		byte context, index;
-		iterator* parent;
-		byte& operator* () const
-			{return property.data[context][index];}
+		PropertyFormat *format;
+		Property *property;
+		index current;
 		
-        iterator operator++ () // prefix ++
-        {
-			iterator& this_after = (parent && index + 1 < property.data[context].size()) ?
-				*this:
-				*parent;
-			
-            if ( /* currently pointing to substructure id */ )
+		inline data_type& data () const
+		    {return property->data[format];}
+		bool is_reduced () const
+		    {return current < format->format.size();} // returns false even if irreducible.
+		void reduce ()
+		{
+			while (!is_reduced() && format->parent)
 			{
-			    iterator ret = new iterator(this_after, *this_after);
-				index++;
-				return ret;
+				current = format->parent_index + 1;
+				format = format->parent;
 			}
-			index++;
-            return this_after;
+		}
+		inline std::pair<PropertyFormat*, index> reduced ()
+		{
+			reduce();
+			return std::make_pair(format, current);
+		}
+		inline std::pair<PropertyFormat*, current> reduced () const
+		    {return iterator(*this).reduced();} // what a hack
+		
+		
+		inline byte& operator* ()
+		{
+			reduce();
+			return data()[current];
+		}
+		byte& operator* () const
+		{
+			auto x = reduced();
+			return property->data[x.first][x.second];
+		}
+		
+        iterator& operator++ () // prefix ++
+        {
+			reduce();
+			PropertyFormat* child = format->child(current, **this);
+            if (child) /* currently pointing to substructure id */
+			{
+			    format = child;
+				current = 0;
+			}
+			else
+				current++;
+            return *this;
         }
+		iterator& operator-- () // prefix --
+		{
+			if (current == 0)
+		    {
+				current = format->parent_index;
+				format = format->parent;
+			}
+			else 
+			{
+				current--;
+				for (PropertyFormat* child = format->child(current, **this); child && child->format.size(); child = format->child(current, **this))
+				{
+					current = child->format.size() - 1;
+					format = child;
+				} // un-reduces iterator 
+			}
+		}
 
-        iterator operator++ (int)  // postfix ++
+        inline iterator operator++ (int)  // postfix ++
         {
            iterator ret(*this);
            ++(*this);
            return ret;
         }
+        inline iterator operator-- (int)  // postfix --
+        {
+           iterator ret(*this);
+           --(*this);
+           return ret;
+        }
 		
-		iterator();//////////
-	}
-};
-
-class PropertyTree {
-	struct entry_format {
-		byte id;
-		byte index;
+		inline bool operator== (iterator comp) const
+    		{return property == comp.property && reduced() == comp.reduced();}
+		inline bool operator!= (iterator comp) const
+		    {return !operator==(comp);}
+		//idk if these are necessary but they have to be exactly the same as the above which is a pain.
+		inline bool operator== (iterator comp)
+    		{return property == comp.property && reduced() == comp.reduced();}
+		inline bool operator!= (iterator comp)
+		    {return !operator==(comp);}
+		
+		iterator(Property *property_r=nullptr, PropertyFormat *root_format=nullptr, index current_c=0)
+		    property(property_r), format(root_format_r), current(current_c)
+		    {}
+		iterator(iterator const &this_c)
+		    iterator(this_c.property, this_c.format, this_c.current)
+			{}
 	};
-	typedef std::vector<entry_format> context;
-	typedef penum penum_size;
-	constexpr byte ID_SUBPROPERTY 0;
-	constexpr byte ID_PENUM 1;
-	std::vector<context> sub_property;
-	std::vector<penum_size> penums;
-	
-	//Maybe these should use iterators? but templatesss
-	void read (Property& output, byte* input) const
+	iterator begin()
+	    {return iterator(this, root, 0);}
+	iterator end()
+	    {return iterator(this, root, root->format.size());} //this will try to reduce itself on comparison if (root->parent)
+    struct branch_struct
 	{
-		
-	}
-	void write (byte* output, Property const &input) const
-	{
-		
-	}
-}*property_tree;
+		Property* property;
+		PropertyFormat* root;
+		iterator begin() const
+	        {return iterator(property, root, 0);}
+	    iterator end() const
+	        {return iterator(property, root, root->format.size());}
+	};
+	branch_struct branch (PropertyFormat* root) // allows you to do things with for (byte& x: prop.branch(component)) {...}
+	    {return branch_struct{this, root};} // please tell me I don't need a ctor
+};
 
 class PropertyTemplate {
 	
