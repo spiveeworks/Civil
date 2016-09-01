@@ -76,6 +76,16 @@ struct Property
 			return property->data[x.first][x.second];
 		}
 		
+		void check_branch(PropertyFormat* check)
+		{
+			if (property->data.count(check))
+			    return;
+			for (PropertyFormat* sibling: check->parent->family_lines[check->parent_index])
+				if (sibling != check)
+					property->data.erase(sibling);
+			data[child].resize(child->format.size());
+		}
+		
         iterator& operator++ () // prefix ++
         {
 			reduce();
@@ -84,6 +94,7 @@ struct Property
 			{
 			    format = child;
 				current = 0;
+				check_branch(child);
 			}
 			else
 				current++;
@@ -103,6 +114,7 @@ struct Property
 				{
 					current = child->format.size() - 1;
 					format = child;
+					check_branch(child);
 				} // un-reduces iterator 
 			}
 		}
