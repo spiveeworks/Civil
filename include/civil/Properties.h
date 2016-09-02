@@ -34,9 +34,30 @@ class PropertyFormat
 
 struct Property
 {
-	typedef std::vector<byte> data_type;
+	typedef std::vector<byte> branch_type;
 	typedef PropertyFormat::index index;
-	std::map<PropertyFormat*, data_type> data;
+	typedef std::map<PropertyFormat*, branch_type> data_type;
+	data_type data;
+	
+	void erase(PropertyFormat* del)
+	{
+		if (!data.erase(del))
+			return;
+		std::vector<data_type::iterator> to_recurse = {del};
+		while (to_recurse) 												// while there is still something on which to recurse
+			for (auto& p: to_recurse.pop_back()->first->family_lines)	// remove one thing to recurse, and, for each possible group of children
+				for (PropertyFormat* next: p->second)					// in fact for each child
+					if (data.erase(next))								// search for and delete the branch associated with that child
+						todel.push_back(next);							// and recurse... unless the child wasn't found anyway
+	}
+	void check_branch(PropertyFormat* check)
+	{
+		if (property->data.count(check))
+			return;
+		for (PropertyFormat* sibling: check->parent->family_lines[check->parent_index])
+			erase_branch(sibling);
+		data[child].resize(child->format.size());
+	}
 	
 	class iterator: public std::iterator<std::bidirectional_iterator, byte>
 	{
@@ -76,15 +97,6 @@ struct Property
 			return property->data[x.first][x.second];
 		}
 		
-		void check_branch(PropertyFormat* check)
-		{
-			if (property->data.count(check))
-			    return;
-			for (PropertyFormat* sibling: check->parent->family_lines[check->parent_index])
-				if (sibling != check)
-					property->data.erase(sibling);
-			data[child].resize(child->format.size());
-		}
 		
         iterator& operator++ () // prefix ++
         {
@@ -94,7 +106,7 @@ struct Property
 			{
 			    format = child;
 				current = 0;
-				check_branch(child);
+				property->check_branch(child);
 			}
 			else
 				current++;
@@ -114,7 +126,7 @@ struct Property
 				{
 					current = child->format.size() - 1;
 					format = child;
-					check_branch(child);
+					property->check_branch(child);
 				} // un-reduces iterator 
 			}
 		}
