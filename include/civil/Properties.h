@@ -29,36 +29,44 @@ class PropertyFormat
 
 typedef spw::leaf_sequence<byte, PropertyFormat> Property;
 
-
-class PropertyTemplate spw::leaf_sequence<std::pair<PTO, thinggggg>, PropertyFormat>;
-class PropertyTemplate::iterator
-{
-	Property::iterator base;
-	PropertyTemplateObject::iterator op;
-	iterator& operator++()
-	{
-		switch(op->first)
-		{
-		  case PTO_STATIC:
-			++op;
-			break;
-		  case PTO_STATIC_BRANCH:
-			op.rebranch(op->second);
-			//op = PropertyTemplateObject::iterator(op.tree, op.format->child(op.current, op->second));
-			break;
-		  case PTO_BASE:
-			++op;
-			++base;
-			break;
-		  case PTO_BASE_BRANCH:
-			break;
-		}
-		while(
-		  case PTO_TEMPLATE_BRANCH:
-			op.rebranch(*base);
-			++base;
-			break;
-	}
+struct thinggggg {
+    enum {
+        
+    }pto;
+    union{
+        byte statit_el;
+        
+    };
 };
 
+typedef spw::leaf_sequence<std::pair<PTO, thinggggg>, PropertyFormat> PropertyTemplate;
+
+template<class out_it_t>
+out_it_t apply_template(out_it_t out_it, Property const &base, PropertyTemplate::iterator template_begin, PropertyTemplate::iterator template_end)
+{
+   for (auto& ops = *template_begin; template_begin != template_end; ops = *++template_begin)
+   {
+       bool success = false;
+       for (auto& op: ops)
+       {
+           switch(op.pto)
+           {
+              case PTO_STATIC:
+                *out_it++ = op.static_el;
+                success = true;
+                break;
+              case PTO_BASE:
+                
+                
+           }
+           if (success)
+               break;
+       }
+       if (!success)
+           ; // PROBLEMS
+   }
+   return out_it;
+   }
+}
+}
 
