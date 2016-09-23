@@ -31,12 +31,12 @@ class PropertyFormat
 		return (family_it == family_lines.end()) ? nullptr :family_it->second[child_it];
 	}
 };
-
+template<class el_t>
+using leaf_struct = std::map<PropertyFormat*, std::vector<el_t> >;
 struct Property
 {
-	typedef std::vector<byte> branch_type;
 	typedef PropertyFormat::index index;
-	typedef std::map<PropertyFormat*, branch_type> data_type;
+	typedef leaf_struct<byte> data_type;  // usage: byte datum = data[&branch_format][datum_index];
 	data_type data;
 	
 	void erase(PropertyFormat* del)
@@ -56,128 +56,108 @@ struct Property
 			return;
 		for (PropertyFormat* sibling: check->parent->family_lines[check->parent_index])
 			erase_branch(sibling);
-		data[child].resize(child->format.size());
+		data[check].resize(check->format.size());
+	}
+	template<class in_it_t>
+	in_it_t read_in(in_it_t in_it, PropertyFormat* branch)
+	{
+	    check_branch(branch);
+	    std::vector<byte> &branch_data = data[branch];
+	    auto out_it = branch_data.begin();
+	    for (std::pair<index, std::vector<PropertyFormat*> >& family: branch->family_lines)
+	    {
+	        while(out_it != branch_data.begin() + family.first + 1)
+	            *out_it++ = *in_it++; // I love C++
+	        in_it = read_in(in_it, family.second[branch_data[family.first]])
+	    }
+        while(out_it != branch_data.end())
+            *out_it++ = *in_it++;
+        return in_it;
 	}
 	
-	class iterator: public std::iterator<std::bidirectional_iterator, byte>
+	template<class out_it_t>
+	out_it_t write_out(out_it_t out_it, PropertyFormat* branch) const
 	{
-		PropertyFormat *format;
-		Property *property;
-		index current;
-		
-		inline data_type& data () const
-		    {return property->data[format];}
-		bool is_reduced () const
-		    {return current < format->format.size();} // returns false even if irreducible.
-		void reduce ()
-		{
-			while (!is_reduced() && format->parent)
-			{
-				current = format->parent_index + 1;
-				format = format->parent;
-			}
-		}
-		inline std::pair<PropertyFormat*, index> reduced ()
-		{
-			reduce();
-			return std::make_pair(format, current);
-		}
-		inline std::pair<PropertyFormat*, current> reduced () const
-		    {return iterator(*this).reduced();} // what a hack
-		
-		
-		inline byte& operator* ()
-		{
-			reduce();
-			return data()[current];
-		}
-		byte& operator* () const
-		{
-			auto x = reduced();
-			return property->data[x.first][x.second];
-		}
-		
-		
-        iterator& operator++ () // prefix ++
-        {
-			reduce();
-			PropertyFormat* child = format->child(current, **this);
-            if (child) /* currently pointing to substructure id */
-			{
-			    format = child;
-				current = 0;
-				property->check_branch(child);
-			}
-			else
-				current++;
-            return *this;
-        }
-		iterator& operator-- () // prefix --
-		{
-			if (current == 0)
-		    {
-				current = format->parent_index;
-				format = format->parent;
-			}
-			else 
-			{
-				current--;
-				for (PropertyFormat* child = format->child(current, **this); child && child->format.size(); child = format->child(current, **this))
-				{
-					current = child->format.size() - 1;
-					format = child;
-					property->check_branch(child);
-				} // un-reduces iterator 
-			}
-		}
-
-        inline iterator operator++ (int)  // postfix ++
-        {
-           iterator ret(*this);
-           ++(*this);
-           return ret;
-        }
-        inline iterator operator-- (int)  // postfix --
-        {
-           iterator ret(*this);
-           --(*this);
-           return ret;
-        }
-		
-		inline bool operator== (iterator comp) const
-    		{return property == comp.property && reduced() == comp.reduced();}
-		inline bool operator!= (iterator comp) const
-		    {return !operator==(comp);}
-		//idk if these are necessary but they have to be exactly the same as the above which is a pain.
-		inline bool operator== (iterator comp)
-    		{return property == comp.property && reduced() == comp.reduced();}
-		inline bool operator!= (iterator comp)
-		    {return !operator==(comp);}
-		
-		iterator(Property *property_r=nullptr, PropertyFormat *root_format=nullptr, index current_c=0)
-		    property(property_r), format(root_format_r), current(current_c)
-		    {}
-		iterator(iterator const &this_c)
-		    iterator(this_c.property, this_c.format, this_c.current)
-			{}
-	};
-	iterator begin()
-	    {return iterator(this, root, 0);}
-	iterator end()
-	    {return iterator(this, root, root->format.size());} //this will try to reduce itself on comparison if (root->parent)
-    struct branch_struct
-	{
-		Property* property;
-		PropertyFormat* root;
-		iterator begin() const
-	        {return iterator(property, root, 0);}
-	    iterator end() const
-	        {return iterator(property, root, root->format.size());}
-	};
-	branch_struct branch (PropertyFormat* root) // allows you to do things with for (byte& x: prop.branch(component)) {...}
-	    {return branch_struct{this, root};} // please tell me I don't need a ctor
-};
-
-class PropertyTemplate {
+	    std::vector<byte> &branch_data = data.at(branch);
+	    auto in_it = branch_data.begin();
+	    for (std::pair<index, std::vector<PropertyFormat*> >& family: branch->family_lines)
+	    {
+	        out_it = std::copy(in_it, branch_data.begin() + family.first + 1, out_it)
+	        out_it = write_out(out_it, family.second[branch_data[family.first]])
+	    }
+        return std::copy(in_it, branch_data.end(), out_it);
+	}
+	
+	
 	
 };
+
+typedef std::pair<PropertyFormat*, byte> leaf_index;
+typedef leaf_struct<std::vector<leaf_index> > PropertyTemplate; // vector? why not forward_list?
+
+bool apply_leaf_indeces(std::vector<byte>& out, Property const &base, std::vector<std::vector<leaf_index> > const &op_branch, index copy_from, index copy_to)
+{// my attempt at making the code less monstrous by making two functions didn't do so well
+    index curr_size = out.size();
+    out.resize(curr_size + copy_to - copy_from);
+    auto out_it = out.end() - copy_to;  // such that out_it[copy_from] will currently refer to the first of the new bytes
+    while(copy_from < copy_to)
+    {
+        bool success = false;
+        for (leaf_index p: op_branch[copy_from])
+        {
+            if (!p.first)
+            {
+                out_it[copy_from] = p.second;
+                success = true;
+                break;
+            }
+            auto branch_it = base.data.find(p.first);
+            if branch_it == base.data.end()
+                continue;
+            out = (*branch_it)[p.second];
+            return true;
+        }
+        if(!success)
+            return false;
+        copied++;
+    }
+}
+
+bool apply_template(std::vector<byte>& out, Property const &base, PropertyTemplate const &op_tree, PropertyFormat* branch)
+{// lol good luck debugging
+    using index = std::vector<byte>::size_type;
+    index prev_size = out.size();
+    auto const &op_branch = op_tree.at(branch);
+    index copied = 0;
+    for (std::pair<index, std::vector<PropertyFormat*> >& family: branch->family_lines)
+    {
+        if (!apply_leaf_indeces(out, base, op_branch, copied, family.first))
+        {
+            out.resize(prev_size);
+            return false;
+        }
+        copied = family.first();
+        bool child_success = false;
+        for(leaf_index p: op_branch[copied])
+        {
+            //special meaning if (p.first)?
+            out.push_back(p.second);
+            child_success = apply_template(out, base, op_tree, family.second[copied]);
+            if (child_success)
+                break;
+            out.pop_back();
+        }
+        if(!child_success)
+        {
+            out.resize(prev_size);
+            return false;
+        }
+    }
+    if (!apply_leaf_indeces(out, base, op_branch, copied, op_branch.size()))
+    {
+        out.resize(prev_size);
+        return false;
+    }
+    return true;
+}
+
