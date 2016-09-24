@@ -71,6 +71,11 @@ struct Property
         return in_it;
 	}
 	
+	/* recommended to use 
+	 * 
+	 * std::vector<byte> data;
+	 * write_out(std::back_inserter(data), root_branch)
+	 */
 	template<class out_it_t>
 	out_it_t write_out(out_it_t out_it, PropertyFormat* branch) const
 	{
