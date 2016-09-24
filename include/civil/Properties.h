@@ -91,12 +91,26 @@ struct Property
 struct leaf_index{
 	PropertyFormat *base_branch;
 	byte value;
-}
+};
+
 struct PropertyTemplate {
     variant_leaf_struct<std::vector<leaf_index>, int> format; // vector? why not forward_list?
-    std::map<PropertyFormat*, std::vector<int>> width;
+    std::map<PropertyFormat*, int> width;
     inline std::vector<leaf_index>& op_branch (PropertyFormat* branch, int variant)
         {return format.at(std::make_pair(branch, variant));}
+    
+    PropertyTemplate(variant_leaf_struct<std::vector<leaf_index>, int> format_c)
+    {
+    	swap(format, format_c); // copy swap
+    	for(std::pair<std::pair<PropertyFormat*, int>, std::vector<std::vector<leaf_index>>> const &p: format)
+    	{
+    		PropertyFormat* child = p.first.first;
+    		p_width = width[child];
+    		for (std::pair<index, std::vector<PropertyFormat*>> &family: child->family_lines)
+    		    p_width = std::max(p_width, p.second[family.first].size()); // note that if forward_list is used instead for these then distance will be needed
+    		width[child] = p_width;
+    	}
+    }
 };
 
 /* PropertyTemplate
@@ -151,11 +165,12 @@ bool apply_leaf_indeces(std::vector<byte>& out, Property const &base, std::vecto
 bool apply_template(std::vector<byte>& out, Property const &base, PropertyTemplate const &op_tree, PropertyFormat* branch, int branch_variant)
 {// lol good luck debugging
     using index = std::vector<byte>::size_type;
-    index prev_size = out.size();
+    
+    index const prev_size = out.size();
     auto const &op_branch = op_tree.op_branch(branch, branch_variant);
+    int const root_variant = branch_variant * op_tree.width.at(branch); // this way parent's variants won't overlap with parent
+    
     index copied = 0;
-    index family_count = 0; // for getting the width of a particular set of options
-    std::vector<int> const &width = op_tree.width.at(branch)
     for (std::pair<index, std::vector<PropertyFormat*> >& family: branch->family_lines)
     {
         if (!apply_leaf_indeces(out, base, op_branch, copied, family.first))
@@ -166,7 +181,7 @@ bool apply_template(std::vector<byte>& out, Property const &base, PropertyTempla
         copied = family.first();
         
         bool child_success = false;
-        int child_variant = branch_variant * width[family_count++]; // this way parent's variants won't overlap with parent
+        int child_variant = root_variant;
         for(leaf_index p: op_branch[copied])
         {
             //special meaning if (p.first)?
