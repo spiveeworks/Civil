@@ -5,13 +5,6 @@ typedef unsigned char byte;
 // output object data as compact bytes
 // take compact bytes and make object + data
 
-class EntityClass 
-{
-	
-};
-
-typedef byte penum;
-
 class PropertyFormat 
 {
 	typedef std::pair<byte, byte> element;
@@ -31,8 +24,11 @@ class PropertyFormat
 		return (family_it == family_lines.end()) ? nullptr :family_it->second[child_it];
 	}
 };
-template<class el_t>
-using leaf_struct = std::map<PropertyFormat*, std::vector<el_t> >;
+template<class el_t, class branch_t = PropertyFormat*>
+using leaf_struct = std::map<branch_t, std::vector<el_t>>;
+template<class el_t, class variant_t, class branch_t = PropertyFormat*>
+using variant_leaf_struct = leaf_struct<el_t, std::pair<branch_t, variant_t>>;
+
 struct Property
 {
 	typedef PropertyFormat::index index;
@@ -92,8 +88,37 @@ struct Property
 	
 };
 
-typedef std::pair<PropertyFormat*, byte> leaf_index;
-typedef leaf_struct<std::vector<leaf_index> > PropertyTemplate; // vector? why not forward_list?
+struct leaf_index{
+	PropertyFormat *base_branch;
+	byte value;
+}
+struct PropertyTemplate {
+    variant_leaf_struct<std::vector<leaf_index>, int> format; // vector? why not forward_list?
+    std::map<PropertyFormat*, std::vector<int>> width;
+    inline std::vector<leaf_index>& op_branch (PropertyFormat* branch, int variant)
+        {return format.at(std::make_pair(branch, variant));}
+};
+
+/* PropertyTemplate
+ * maps std::pair<PropertyFormat*, int> to an iterable over leaf_index
+ * each leaf_index is a possible way of interpretting an outout byte in terms of an input byte
+ * elements that don't have branches can describe sources of bytes from a base property
+ * elements that do have branches can describe branches to attempt
+ * branches can be attempted multiple times in multiple ways
+ *
+ * variant ids of each child are:
+ * parent_variant * child_variant_count + child_index
+ * where parent_variant is the variant calculated for the parent branch,
+ * child_variant_count is the highest number of child variants that a single parent associates with the relevant family line
+ * child_index is particular to a child on a per parent basis. child_endex must be less than child_variant count
+ *
+ * child_variant_count can be found using template.width.at(parent)[line]
+ * where line is the number of family lines at indeces below the desired family line
+ * parent is the PropertyFormat* of the parent
+ * template is a PropertyTemplate object
+ *
+ */
+
 
 bool apply_leaf_indeces(std::vector<byte>& out, Property const &base, std::vector<std::vector<leaf_index> > const &op_branch, index copy_from, index copy_to)
 {// my attempt at making the code less monstrous by making two functions didn't do so well
@@ -123,12 +148,14 @@ bool apply_leaf_indeces(std::vector<byte>& out, Property const &base, std::vecto
     }
 }
 
-bool apply_template(std::vector<byte>& out, Property const &base, PropertyTemplate const &op_tree, PropertyFormat* branch)
+bool apply_template(std::vector<byte>& out, Property const &base, PropertyTemplate const &op_tree, PropertyFormat* branch, int branch_variant)
 {// lol good luck debugging
     using index = std::vector<byte>::size_type;
     index prev_size = out.size();
-    auto const &op_branch = op_tree.at(branch);
+    auto const &op_branch = op_tree.op_branch(branch, branch_variant);
     index copied = 0;
+    index family_count = 0; // for getting the width of a particular set of options
+    std::vector<int> const &width = op_tree.width.at(branch)
     for (std::pair<index, std::vector<PropertyFormat*> >& family: branch->family_lines)
     {
         if (!apply_leaf_indeces(out, base, op_branch, copied, family.first))
@@ -137,12 +164,14 @@ bool apply_template(std::vector<byte>& out, Property const &base, PropertyTempla
             return false;
         }
         copied = family.first();
+        
         bool child_success = false;
+        int child_variant = branch_variant * width[family_count++]; // this way parent's variants won't overlap with parent
         for(leaf_index p: op_branch[copied])
         {
             //special meaning if (p.first)?
             out.push_back(p.second);
-            child_success = apply_template(out, base, op_tree, family.second[copied]);
+            child_success = apply_template(out, base, op_tree, family.second[copied], child_variant++);
             if (child_success)
                 break;
             out.pop_back();
