@@ -1,0 +1,22 @@
+
+species: any visible.stationary.plant.species
+growth: any visible.stationary.plant.state
+grow_timer: timer
+
+visible, class: stationary, order: plant
+    species: species
+    growth: state
+    grown: grow_timer
+
+when state is finished:
+    when receives signal: tangible
+        when signal.nature is harvest:
+            state: growing
+when state is growing:
+    when grow_timer is off:
+        grow_timer: on
+        grow_timer: 5 - 6 minutes
+    when grow_timer is at most 0:
+        grow_timer: off
+        state: finished
+        
