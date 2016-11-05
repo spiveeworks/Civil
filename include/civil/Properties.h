@@ -93,12 +93,96 @@ struct Property
 	
 };
 
-struct leaf_index{
-	PropertyFormat *base_branch;
-	byte value;
+struct datum {
+    byte value = 0;
+    PropertyFormat *branch = nullptr;
+    byte operator()(Property const &base)
+        {return branch ? base.data.at(branch)[value] : value;}
 };
 
+struct comparison {
+    static EQU = 1,
+           LSS = 2;
+           GTR = 4;
+         UNDEF = 8;
+    char flags; // note only a nibble is used
+    datum ld, rd; // left and right data
+    bool operator()(Property const &base)
+    {
+        byte lv, rv;
+      try
+      {
+        lv = ld(base);
+        rv = rd(base);
+      }
+      catch()
+        return flags & UNDEF;
+        
+        switch (flags & (EQU | LSS | GTR))
+        {
+          case NULL:
+            return false;
+          case EQU:
+            return lv == rv;
+          case LSS:
+            return lv < rv;
+          case GTR:
+            return lv > rv;
+          case EQU | LSS:
+            return lv <= rv;
+          case EQU | GTR:
+            return lv >= rv;
+          case LSS | GTR:
+            return lv != rv;
+          case EQU | LSS | GTR:
+            return true;
+        }
+    }
+}
+
+struct datum_template {
+    struct conditioned_datum {
+        datum out;
+        std::vector<comparison> conditions;
+        bool test(Property const& base) // maybe EAFTP? not literally but the style here is inconsistent otherwise
+        {
+            for (coparison& condition: conditions)
+                if (!condition(base))
+                    return false;
+            return true;
+        }
+        byte operator()(Property const &base)
+            {return out(base);}
+    };
+    std::vector<conditioned_datum> possibilities;
+    byte operator()(Property const &base)
+    {
+        for (conditioned_datum& possibility: possibilities)
+            if (possibility.test(base))
+                return possibility(base)
+        throw ranouttavalueslol;
+    }
+}
+
+struct branch_template {
+    PropertyFormat *output_format;
+    std::vector<datum_template> elements;
+    std::vector<byte> operator()(Property const &base)
+    {
+        std::vector<byte> ret;
+        ret.reserve(output_format->format.size());
+        for (datum_template& element: elements)
+            ret.push_back(element(base))
+        return ret;
+    }
+}
+
 struct PropertyTemplate {
+    //comp_flags = powerset(UNDEF | LSS | GTR | EQU)
+    //datum = <(substruct_format, substruct index),literal_datum>
+    //conditions = (comp_flags, datum_A, datum_B)
+    //structure = (format, [datum,[conditions]])
+    //template = [structures]
     variant_leaf_struct<std::vector<leaf_index>, int> format; // vector? why not forward_list?
     std::map<PropertyFormat*, int> width;
     inline std::vector<leaf_index>& op_branch (PropertyFormat* branch, int variant)
