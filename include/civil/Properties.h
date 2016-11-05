@@ -10,13 +10,14 @@ class PropertyFormat
 	typedef std::pair<byte, byte> element;
 	typedef std::vector<element> format_type;
 	typedef std::vector<PropertyFormat*> family_type;
-	typedef format_type::size_type index
+	typedef format_type::size_type index;
+    typedef std::map<index, family_type> family_lines_type;
 	
 	PropertyFormat const &parent;
 	index parent_index;
 	
 	format_type format;
-	std::map<index, family_type> family_lines;
+	family_lines_type family_lines;
 	
 	PropertyFormat* child (index line_index, byte child_id)
 	{
@@ -138,7 +139,7 @@ struct comparison {
             return true;
         }
     }
-}
+};
 
 struct datum_template {
     struct conditioned_datum {
@@ -151,29 +152,56 @@ struct datum_template {
                     return false;
             return true;
         }
-        byte operator()(Property const &base)
-            {return out(base);}
     };
     std::vector<conditioned_datum> possibilities;
     byte operator()(Property const &base)
     {
         for (conditioned_datum& possibility: possibilities)
             if (possibility.test(base))
-                return possibility(base)
+                return possibility.out(base);
         throw ranouttavalueslol;
     }
-}
+};
 
-struct branch_template {
-    PropertyFormat *output_format;
-    std::vector<datum_template> elements;
-    std::vector<byte> operator()(Property const &base)
+struct PropertyTemplate {
+    struct branch_template {
+        PropertyFormat *output_format;
+        std::vector<datum_template> elements;
+        std::vector<byte> operator()(Property const &base)
+        {
+            std::vector<byte> ret;
+            ret.reserve(output_format->format.size());
+            for (datum_template& element: elements)
+                ret.push_back(element(base))
+            return ret;
+        }
+    };
+    struct stack_entry {
+        std::vector<branch_template>::size_type current_branch;
+        PropertyFormat::family_lines_type::iterator current_line;
+        std::vector<datum_template::conditioned_datum>::iterator current_child_branch;
+    };
+    std::vector<branch_template> branches;
+    std::vector<branch_template>::size_type root_num;
+    Property operator()(Property const &base)
     {
-        std::vector<byte> ret;
-        ret.reserve(output_format->format.size());
-        for (datum_template& element: elements)
-            ret.push_back(element(base))
-        return ret;
+        std::stack<stack_entry> branch_stack;
+        for (std::vector<branch_template>::size_type current_root = 0; current_root < root_num; ++current_root)
+        {
+            stack_entry entry;
+            entry.current_branch = current_root;
+            current_branch = branches[current_branch];
+            Property ret;
+            std::vector<byte> &output_data = ret.data[current_branch.output_format];
+            output_data.reserve(current_branch.output_format->format.size());
+            entry.current_line = current_branch.output_format->family_lines.begin();
+            current_element = 0;
+                output_data.push_back((*it)(base));
+            do
+            {
+                
+            } while (branch_stack.size() > 0);
+        }
     }
 }
 
