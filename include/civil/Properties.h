@@ -230,35 +230,35 @@ struct PropertyTemplate {
     {
         std::stack<stack_entry> branch_stack;
         Property ret;
-        for (std::vector<branch_template>::size_type current_root = 0; current_root < root_num; ++current_root)
+        stack_entry entry;
+        decltype(root_num) current_root = 0;
+        while (branch_stack || current_root < root_num);
         {
-            stack_entry entry(current_root, branches, ret);
-            while (branch_stack.size() > 0 || entry.current_line != entry.family_lines().end());
+            if (branch_stack)
             {
-                while (entry.current_line != entry.family_lines().end())
-                {
-                    for (current_element = entry.prev_element(); current_element < entry.next_element(); ++current_element)
-                        entry.output_data(ret).push_back(entry.current_branch().elements[current_element](base));
-                    while 
-                    (
-                      entry.current_child_branch != entry.current_child_branches().end() 
-                      && 
-                      (
-                        !entry.current_child_branch->test(base) 
-                        || entry.current_child_branch->out.test(base)
-                      )
-                    )
-                        ++entry.current_child_branch;
-                    if (entry.current_child_branch == entry.current_child_branches().end())
-                        throw ranouttapossibilities;
-                    branch_stack.push(entry);
-                    entry = stack_entry((*entry.current_child_branch)(base), branches, ret);
-                    
-                }
-                for (current_element = entry.prev_element(); current_element < entry.next_element(); ++current_element)
-                    entry.output_data().push_back(entry.current_branch().elements[current_element](base));
                 entry = branch_stack.pop();
                 entry.output_data(ret).push_back(entry.child_id());
+            }
+            else
+                entry = stack_entry(current_root++, branches, ret);
+            while (entry.current_line != entry.family_lines().end())
+            {
+                for (current_element = entry.prev_element(); current_element < entry.next_element(); ++current_element)
+                    entry.output_data(ret).push_back(entry.current_branch().elements[current_element](base));
+                while 
+                (
+                  entry.current_child_branch != entry.current_child_branches().end() 
+                  && 
+                  (
+                    !entry.current_child_branch->test(base) 
+                    || entry.current_child_branch->out.test(base)
+                  )
+                )
+                    ++entry.current_child_branch;
+                if (entry.current_child_branch == entry.current_child_branches().end())
+                    throw ranouttapossibilities;
+                branch_stack.push(entry);
+                entry = stack_entry((*entry.current_child_branch)(base), branches, ret);
             }
             for (current_element = entry.prev_element(); current_element < entry.next_element(); ++current_element)
                 entry.output_data().push_back(entry.current_branch().elements[current_element](base));
