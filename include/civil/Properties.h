@@ -233,7 +233,7 @@ struct PropertyTemplate {
         for (std::vector<branch_template>::size_type current_root = 0; current_root < root_num; ++current_root)
         {
             stack_entry entry(current_root, branches, ret);
-            while (branch_stack.size() > 0 && entry.current_line != entry.family_lines().end());
+            while (branch_stack.size() > 0 || entry.current_line != entry.family_lines().end());
             {
                 while (entry.current_line != entry.family_lines().end())
                 {
@@ -382,4 +382,3 @@ bool apply_template(std::vector<byte>& out, Property const &base, PropertyTempla
     }
     return true;
 }
-
