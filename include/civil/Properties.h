@@ -252,13 +252,15 @@ struct PropertyTemplate {
         std::vector<branch_template>::size current_root = 0;
         while (entries || current_root < root_num)
         {
+        	 try
+        	 {
         	   if (!entries)
                 stack_entry.emplace(current_root++, branches, ret);
             for (current_element = entries.top().prev_element(); current_element < entries.top().next_element(); ++current_element)
                 entries.top().output_data(ret).push_back(entries.top().current_branch().elements[current_element](base));
             if (entries.top().current_line != entries.top().family_lines().end())
             {
-                find_child();
+                entries.top().find_child();
                 if (entries.top().current_child_branch == entries.top().current_child_branches().end())
                     throw ranouttapossibilities;
                 entries.emplace((*entries.top().current_child_branch)(base), branches, ret);
@@ -271,6 +273,17 @@ struct PropertyTemplate {
                 entries.top().output_data(ret).push_back(entries.top().child_id());
                 ++entries.top().current_line;
             }
+          }
+          catch (stuph)
+          {
+          	 do
+          	 {
+          	 	   ret.data.erase(entries.top().current_branch().output_format);
+          	 	   entries.pop();
+          	 	   if (entries)
+          	 	       entries.top().next_child_branch();
+          	 } while (entries && entries.top().current_child_branch != entries.top().current_child_branches().end());
+          }
         }
         return ret;
     }
