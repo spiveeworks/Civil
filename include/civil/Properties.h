@@ -189,7 +189,7 @@ struct PropertyTemplate {
             output_data(output).clear();
             output_data(output).reserve(current_branch().output_format->format.size());
             current_line = family_lines().begin();
-            entry.current_child_branch = current_child_branches().begin();
+            current_child_branch = current_child_branches().begin();
         }
         branch_template& current_branch() const
             {return branches[current_branch_ind];}
@@ -198,7 +198,7 @@ struct PropertyTemplate {
         PropertyFormat::family_lines_type& family_lines() const
             {return current_branch().output_format->family_lines;}
         std::vector<datum_template::conditioned_datum>& current_child_branches () const
-            {return current_branch.elements[entry.current_line->first];}
+            {return current_branch.elements[current_line->first];}
         std::vector<datum_template>::size_type prev_element() const
         {
             if (current_line == family_lines.begin()) 
@@ -219,50 +219,60 @@ struct PropertyTemplate {
         byte child_id() const
         {
             for (byte x = 0; x < current_line->second.size(); ++x)
-                if (branches[(*entry.current_child_branch)(base)].output_format == current_line->second[x])
+                if (branches[(*current_child_branch)(base)].output_format == current_line->second[x])
                     return x;
             throw bad_child_branch_rip
         }
+        void find_child_branch(Property const &base)
+        {
+            while 
+            (
+              current_child_branch != current_child_branches().end() 
+              && 
+              (
+                !current_child_branch->test(base) 
+                || current_child_branch->out.test(base)
+              )
+            )
+                ++current_child_branch;
+        }
+        void next_child_branch(Property const &base)
+        {
+            ++current_child_branch;
+            find_child_branch(base);
+        }
+
     };
     std::vector<branch_template> branches;
     std::vector<branch_template>::size_type root_num;
     Property operator()(Property const &base)
     {
-        std::stack<stack_entry> branch_stack;
+        std::stack<stack_entry> entries;
         Property ret;
-        stack_entry entry;
-        decltype(root_num) current_root = 0;
-        while (branch_stack || current_root < root_num);
+        std::vector<branch_template>::size current_root = 0;
+        while (entries || current_root < root_num)
         {
-            if (branch_stack)
+        	   if (!entries)
+                stack_entry.emplace(current_root++, branches, ret);
+            for (current_element = entries.top().prev_element(); current_element < entries.top().next_element(); ++current_element)
+                entries.top().output_data(ret).push_back(entries.top().current_branch().elements[current_element](base));
+            if (entries.top().current_line != entries.top().family_lines().end())
             {
-                entry = branch_stack.pop();
-                entry.output_data(ret).push_back(entry.child_id());
+                find_child();
+                if (entries.top().current_child_branch == entries.top().current_child_branches().end())
+                    throw ranouttapossibilities;
+                entries.emplace((*entries.top().current_child_branch)(base), branches, ret);
             }
             else
-                entry = stack_entry(current_root++, branches, ret);
-            while (entry.current_line != entry.family_lines().end())
             {
-                for (current_element = entry.prev_element(); current_element < entry.next_element(); ++current_element)
-                    entry.output_data(ret).push_back(entry.current_branch().elements[current_element](base));
-                while 
-                (
-                  entry.current_child_branch != entry.current_child_branches().end() 
-                  && 
-                  (
-                    !entry.current_child_branch->test(base) 
-                    || entry.current_child_branch->out.test(base)
-                  )
-                )
-                    ++entry.current_child_branch;
-                if (entry.current_child_branch == entry.current_child_branches().end())
-                    throw ranouttapossibilities;
-                branch_stack.push(entry);
-                entry = stack_entry((*entry.current_child_branch)(base), branches, ret);
+                entries.pop();
+                if (!entries)
+                    break;
+                entries.top().output_data(ret).push_back(entries.top().child_id());
+                ++entries.top().current_line;
             }
-            for (current_element = entry.prev_element(); current_element < entry.next_element(); ++current_element)
-                entry.output_data().push_back(entry.current_branch().elements[current_element](base));
         }
+        return ret;
     }
 }
 
