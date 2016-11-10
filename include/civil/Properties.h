@@ -116,28 +116,14 @@ struct comparison {
         lv = ld(base);
         rv = rd(base);
       }
-      catch()
+      catch(stuph)
         return flags & UNDEF;
         
-        switch (flags & (EQU | LSS | GTR))
-        {
-          case NULL:
-            return false;
-          case EQU:
-            return lv == rv;
-          case LSS:
-            return lv < rv;
-          case GTR:
-            return lv > rv;
-          case EQU | LSS:
-            return lv <= rv;
-          case EQU | GTR:
-            return lv >= rv;
-          case LSS | GTR:
-            return lv != rv;
-          case EQU | LSS | GTR:
-            return true;
-        }
+        if (lv == rv)
+            return flags & EQU;
+        if (lv < rv)
+            return flags & LSS;
+        return flags & GTR;
     }
 };
 
