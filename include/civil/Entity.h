@@ -8,7 +8,13 @@ typedef unsigned char SpaceIndex;
 
 #include "Event.forward"
 
-class Component;
+class species
+{
+    PropertyTemplate display;
+    //in the future maybe a template that deals with texture? May require multi-arg templating
+    //scripts and their conditions
+    //internal data format
+};
 
 class Entity 
 {
