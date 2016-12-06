@@ -9,7 +9,7 @@ class PropertyFormat
 {
 	typedef std::pair<byte, byte> element;
 	typedef std::vector<element> format_type;
-	typedef std::vector<PropertyFormat*> family_type;
+	typedef std::vector<PropertyFormat*> family_type;  // length one array could indicate that that line is to a list of child data branches. this would be bad though as lists are ambiguous (each element of the list shares possible child data formats) and hence need to be processed along with components anyway.
 	typedef format_type::size_type index;
     typedef std::map<index, family_type> family_lines_type;
 	
