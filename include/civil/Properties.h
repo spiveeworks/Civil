@@ -1,6 +1,7 @@
 #include <vector>
 #include <map>
 #include <bitset>
+#include <stack>
 
 typedef unsigned char byte;
 
@@ -137,6 +138,17 @@ struct comparison {
     }
 };
 
+class template_value_error: public std::logic_error
+{
+  public:
+    template_value_error(std::string const &what_arg):
+        std::logic_error(what_arg)
+        {}
+    template_value_error(char const *what_arg):
+        std::logic_error(what_arg)
+        {}
+};
+
 struct datum_template {
     struct conditioned_datum {
         datum out;
@@ -162,7 +174,7 @@ struct datum_template {
           catch(std::out_of_range)
             {;}
         }
-        throw ranouttavalueslol;
+        throw template_value_error("Ran out of possibilities for static element");
         
     }
 };
@@ -183,31 +195,30 @@ struct PropertyTemplate {
     std::vector<branch_template> branches;
     std::vector<branch_template>::size_type root_num;
     struct stack_entry {
-        std::vector<branch_template>::size_type current_branch_ind;
+        std::vector<branch_template>::iterator current_branch;
         PropertyFormat::family_lines_type::iterator current_line;
         std::vector<datum_template::conditioned_datum>::iterator current_child_branch;
         
         stack_entry() = default;
         stack_entry(stack_entry const &) = default;
-        stack_entry(std::vector<branch_template>::size_type current_branch_ind_c, std::vector<branch_template> &branches, Property &output)
+        stack_entry(std::vector<branch_template>::size_type current_branch_ind, std::vector<branch_template> &branches, Property &output)
         {
-            current_branch_ind = current_branch_ind_c;
+            current_branch = branches.begin() + current_branch_ind;
             output_data(output).clear();
-            output_data(output).reserve(current_branch().output_format->format.size());
+            output_data(output).reserve(current_branch->output_format->format.size());
             current_line = family_lines().begin();
             current_child_branch = current_child_branches().begin();
         }
-        branch_template& current_branch() const
-            {return branches[current_branch_ind];}
+
         std::vector<byte>& output_data(Property &output) const
-            {return output.data[current_branch().output_format];}
+            {return output.data[current_branch->output_format];}
         PropertyFormat::family_lines_type& family_lines() const
-            {return current_branch().output_format->family_lines;}
+            {return current_branch->output_format->family_lines;}
         std::vector<datum_template::conditioned_datum>& current_child_branches () const
-            {return current_branch().elements[current_line->first];}
+            {return current_branch->elements[current_line->first].possibilities;}  // takes the array of possible children associated with the current_line iterator, unwrapping the datum_template, since operator() is not needed in this context
         std::vector<datum_template>::size_type prev_element() const
         {
-            if (current_line == family_lines.begin()) 
+            if (current_line == family_lines().begin()) 
                 return 0;
             else
             {
@@ -217,30 +228,23 @@ struct PropertyTemplate {
         }
         std::vector<datum_template>::size_type next_element() const
         {
-            if (current_line == family_lines.end()) 
-                return current_branch().output_format->format.size();
+            if (current_line == family_lines().end()) 
+                return current_branch->output_format->format.size();
             else
                 return current_line->first;
-        }
-        byte child_id() const
-        {
-            for (byte x = 0; x < current_line->second.size(); ++x)
-                if (branches[(*current_child_branch)(base)].output_format == current_line->second[x])
-                    return x;
-            throw bad_child_branch_rip
         }
         void find_child_branch(Property const &base)
         {
             while 
             (
-              current_child_branch != current_child_branches().end() 
+              current_child_branch != current_child_branches().end()  // while there are child branches possible to find
               && 
-              (
-                !current_child_branch->test(base) 
-                || current_child_branch->out.test(base)
+              !(
+                current_child_branch->test(base)                      // and this one has bad conditions
+                //&& current_child_branch->out.test(base)               // or is a bad reference (for now child branches just need to be literal so dw)
               )
             )
-                ++current_child_branch;
+                ++current_child_branch;                               // try the next child branch instead
         }
         void next_child_branch(Property const &base)
         {
@@ -252,40 +256,49 @@ struct PropertyTemplate {
     {
         std::stack<stack_entry> entries;
         Property ret;
-        std::vector<branch_template>::size current_root = 0;
-        while (entries || current_root < root_num)
+        std::vector<branch_template>::size_type current_root = 0;
+        while (!entries.empty() || current_root < root_num)
         {
           try
           {
-        	if (!entries)
-                stack_entry.emplace(current_root++, branches, ret);
-            for (current_element = entries.top().prev_element(); current_element < entries.top().next_element(); ++current_element)
-                entries.top().output_data(ret).push_back(entries.top().current_branch().elements[current_element](base));
+        	if (entries.empty())
+                entries.emplace(current_root++, branches, ret);
+            for (auto current_element = entries.top().prev_element(); current_element < entries.top().next_element(); ++current_element)
+                entries.top().output_data(ret).push_back(entries.top().current_branch->elements[current_element](base));
             if (entries.top().current_line != entries.top().family_lines().end())
             {
-                entries.top().find_child();
+                entries.top().find_child_branch(base);
                 if (entries.top().current_child_branch == entries.top().current_child_branches().end())
-                    throw ranouttapossibilities;
-                entries.emplace((*entries.top().current_child_branch)(base), branches, ret);
+                    throw template_value_error("Ran out of possibilities for dynamic element");
+                entries.emplace(entries.top().current_child_branch->out(base), branches, ret);
             }
             else
             {
                 entries.pop();
-                if (!entries)
+                if (entries.empty())
                     break;
-                entries.top().output_data(ret).push_back(entries.top().child_id());
+                byte child_id = 0; 
+              {
+                PropertyFormat* child_format = branches[entries.top().current_child_branch->out(base)].output_format;
+                std::vector<PropertyFormat*> &child_possibilities = entries.top().current_line->second;
+                while (child_id < child_possibilities.size() && child_possibilities[child_id] != child_format) // see issue #18
+                    ++child_id;
+                if (child_id == child_possibilities.size())
+                    throw std::invalid_argument("PropertyTemplate specified child branch that doesn't nest here");
+              }
+                entries.top().output_data(ret).push_back(child_id);
                 ++entries.top().current_line;
             }
           }
-          catch (stuph)
+          catch (template_value_error)
           {
-          	 do
-          	 {
-          	 	   ret.data.erase(entries.top().current_branch().output_format);
-          	 	   entries.pop();
-          	 	   if (entries)
-          	 	       entries.top().next_child_branch();
-          	 } while (entries && entries.top().current_child_branch != entries.top().current_child_branches().end());
+          	do
+          	{
+                ret.data.erase(entries.top().current_branch->output_format);
+                entries.pop();
+                if (!entries.empty())
+                    entries.top().next_child_branch(base);
+          	} while (!entries.empty() && entries.top().current_child_branch == entries.top().current_child_branches().end());
           }
         }
         return ret;
