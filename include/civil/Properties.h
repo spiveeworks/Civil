@@ -18,7 +18,7 @@ public:
 	typedef format_type::size_type index;
     typedef std::map<index, family_type> family_lines_type;
 	
-	PropertyFormat const &parent;
+	PropertyFormat *parent;  // const correctness?
 	index parent_index;
 	
 	format_type format;
@@ -29,11 +29,15 @@ public:
 		auto family_it = family_lines.find(line_index);
 		return (family_it == family_lines.end()) ? nullptr :family_it->second[child_id];
 	}
+    
+    PropertyFormat (format_type format_c, PropertyFormat *parent_c=nullptr, index parent_index_c=0):
+        format(format_c),
+        parent(parent_c),
+        parent_index(parent_index_c)
+        {if (parent) parent->family_lines[parent_index].push_back(this);}
 };
 template<class el_t, class branch_t = PropertyFormat*>
 using leaf_struct = std::map<branch_t, std::vector<el_t>>;
-template<class el_t, class variant_t, class branch_t = PropertyFormat*>
-using variant_leaf_struct = leaf_struct<el_t, std::pair<branch_t, variant_t>>;
 
 struct Property
 {
@@ -51,7 +55,7 @@ struct Property
             PropertyFormat *this_layer = to_recurse.back();
             to_recurse.pop_back();                      // remove this layer from list
 			for (auto& p: this_layer->family_lines)	    // then for each possible group of children on this layer
-				for (PropertyFormat* next: p.second)   // in fact for each child
+				for (PropertyFormat* next: p.second)    // in fact for each child
 					if (data.erase(next))			    // search for and delete the branch associated with that child
 						to_recurse.push_back(next);		// and recurse... unless the child wasn't found anyway
         }
@@ -60,8 +64,9 @@ struct Property
 	{
 		if (data.count(check))
 			return;
-		for (PropertyFormat* const &sibling: check->parent.family_lines.at(check->parent_index))
-			erase_branch(sibling);
+        if (check->parent)
+            for (PropertyFormat* const &sibling: check->parent->family_lines.at(check->parent_index))
+                erase_branch(sibling);
 		data[check].resize(check->format.size());
 	}
 	template<class in_it_t>
@@ -70,7 +75,7 @@ struct Property
 	    check_branch(branch);
 	    std::vector<byte> &branch_data = data[branch];
 	    auto out_it = branch_data.begin();
-	    for (std::pair<index, std::vector<PropertyFormat*> >& family: branch->family_lines)
+	    for (std::pair<index, std::vector<PropertyFormat*> > const &family: branch->family_lines)
 	    {
 	        while(out_it != branch_data.begin() + family.first + 1)
 	            *out_it++ = *in_it++; // gotta love C++
@@ -89,11 +94,12 @@ struct Property
 	template<class out_it_t>
 	out_it_t write_out(out_it_t out_it, PropertyFormat* branch) const
 	{
-	    std::vector<byte> &branch_data = data.at(branch);
+	    std::vector<byte> const &branch_data = data.at(branch);
 	    auto in_it = branch_data.begin();
-	    for (std::pair<index, std::vector<PropertyFormat*> >& family: branch->family_lines)
+	    for (std::pair<index, std::vector<PropertyFormat*> > const &family: branch->family_lines)
 	    {
 	        out_it = std::copy(in_it, branch_data.begin() + family.first + 1, out_it);
+            in_it = branch_data.begin() + family.first + 1;
 	        out_it = write_out(out_it, family.second[branch_data[family.first]]);
 	    }
         return std::copy(in_it, branch_data.end(), out_it);
@@ -105,10 +111,17 @@ struct Property
 
 struct datum {
     // throws out_of_bounds error when invalid, otherwise always returns a value
-    byte value = 0;
-    PropertyFormat *branch = nullptr;
+    byte value;
+    PropertyFormat *branch;
     byte operator()(Property const &base) const
         {return branch ? base.data.at(branch)[value] : value;}
+    
+    datum (byte value_c = 0, PropertyFormat *branch_c = nullptr):
+        value(value_c),
+        branch(branch_c)
+        {}
+    datum (datum const &) = default;
+    datum& operator= (datum const &) = default;
 };
 
 struct comparison {
@@ -136,6 +149,12 @@ struct comparison {
             return flags[LSS];
         return flags[GTR];
     }
+    template<typename bitit>
+    comparison(bitit flags_c, datum ld_c, datum rd_c):
+        flags(flags_c),
+        ld(ld_c),
+        rd(rd_c)
+        {}
 };
 
 class template_value_error: public std::logic_error
@@ -160,6 +179,15 @@ struct datum_template {
                     return false;
             return true;
         }
+        
+        conditioned_datum(datum out_c, std::vector<comparison> conditions_c = {}):
+            out(out_c),
+            conditions(conditions_c)
+            {}
+        
+        conditioned_datum(conditioned_datum const &) = default;
+        conditioned_datum& operator= (conditioned_datum const &) = default;
+        conditioned_datum(conditioned_datum&&) = default;
     };
     std::vector<conditioned_datum> possibilities;
     byte operator()(Property const &base)
@@ -175,13 +203,16 @@ struct datum_template {
             {;}
         }
         throw template_value_error("Ran out of possibilities for static element");
-        
     }
+    
+    datum_template(std::vector<conditioned_datum> possibilities_c):
+        possibilities(possibilities_c)
+        {}
 };
 
 struct PropertyTemplate {
     struct branch_template {
-        PropertyFormat *output_format;
+        PropertyFormat *output_format; // could be more efficient to store parent index, and deduce the format by parent's format
         std::vector<datum_template> elements;
         std::vector<byte> operator()(Property const &base)
         {
