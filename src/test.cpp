@@ -62,7 +62,7 @@ void test_template_components()
     PropertyFormat child_0c(make_format(array<byte, 4>{1, 1, 1, 1}), &root, 0);
     Property data_a, data_b, data_c;
     {
-        std::array<byte, 4> in_a{0,10,7,2};
+        std::array<byte, 4> in_a{0,4,7,2};
         std::array<byte, 3> in_b{1,7,2};
         std::array<byte, 5> in_c{2,5,6,7,2};
         data_a.read_in(in_a.begin(), &root);
