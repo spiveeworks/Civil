@@ -56,6 +56,7 @@ string datum_results (datum reader, Property data_a, Property data_b, Property d
 
 void test_template_components()
 {
+    cout << "Beginning template exctraction test." << endl;
     PropertyFormat root(make_format(array<byte, 6>{1,1,1,1,1,1}));
     PropertyFormat child_0a(make_format(array<byte, 2>{1, 1}),       &root, 0);
     PropertyFormat child_0b(make_format(array<byte, 0>{}),           &root, 0);
@@ -109,10 +110,52 @@ void test_template_components()
         << (int) comparator(data_c) << endl;
 }
 
+void test_template_routine()
+{
+    vector<PropertyFormat> output_formats;
+    output_formats.reserve();
+    output_formats.emplace_back(make_format(vector<byte>(1, 10*2)));
+    output_formats.emplace_back(make_format(vector<byte>(1, 5*2)), &output_formats[0], 2);
+    output_formats.emplace_back(make_format(vector<byte>(1, 1*2)), &output_formats[0], 2);
+    output_formats.emplace_back(make_format(vector<byte>(1, 1*2)), &output_formats[1], 1);
+    output_formats.emplace_back(make_format(vector<byte>(1, 1*2)), &output_formats[1], 3);
+    output_formats.emplace_back(make_format(vector<byte>(1, 1*2)), &output_formats[0], 7);
+    output_formats.emplace_back(make_format(vector<byte>(1, 0*2)), &output_formats[0], 8);
+    
+    unsigned data_num = 5;
+    std::array<Property, data_num> data;
+    {
+        std::array<vector<byte>, data_num> content =
+        {
+            {
+                0, 0, 0, 
+                    0, 0, 
+                        0,
+                    0, 0, 
+                        0,
+                    0, 
+                0, 0, 0, 0, 0, 
+                    0,
+                0, 0
+            },
+            {},
+            {},
+            {},
+            {},
+        }
+        for (unsigned i = 0; i < data_num; ++i)
+            data[i].read_in(content[i].begin(), &output_formats[0]);
+    }
+    
+    
+    
+}
 
 int main()
 {
     test_property_streaming();
     cout << endl << endl;
     test_template_components();
+    cout << endl << endl;
+    test_template_routine();
 }
