@@ -30,6 +30,30 @@ public:
 		return (family_it == family_lines.end()) ? nullptr :family_it->second[child_id];
 	}
     
+    family_type::size_type child_id(family_lines_type::iterator line, PropertyFormat *child_format)
+    // this overload exists for PropertyTemplate, which has a stack of iterators, not indeces
+    // see issue #18
+    {
+        std::vector<PropertyFormat*> &child_possibilities = line->second;
+        for 
+        (
+            PropertyFormat::family_type::size_type child_id = 0;
+            child_id < child_possibilities.size(); 
+            ++child_id
+        )
+            if (child_possibilities[child_id] == child_format)
+                return child_id;
+        throw std::invalid_argument("specified child branch that doesn't nest here");
+    }
+    family_type::size_type child_id(index line_index, PropertyFormat *child_format)
+    {
+        auto line = family_lines.find(line_index);
+        // think of it as an empty vector, find will always fail
+        if (line == family_lines.end())
+            throw std::invalid_argument("specified child branch that doesn't nest here");
+        return child_id(line, child_format);
+    }
+    
     PropertyFormat (format_type format_c, PropertyFormat *parent_c=nullptr, index parent_index_c=0):
         format(format_c),
         parent(parent_c),
@@ -210,7 +234,8 @@ struct datum_template {
         {}
 };
 
-struct PropertyTemplate {
+class PropertyTemplate {
+  private:
     struct branch_template {
         PropertyFormat *output_format; // could be more efficient to store parent index, and deduce the format by parent's format
         std::vector<datum_template> elements;
@@ -283,6 +308,12 @@ struct PropertyTemplate {
             find_child_branch(base);
         }
     };
+    void ProcessStatics(stack_entry const &top, Property &ret, Property const &base)
+    {
+        for (auto current_element = top.prev_element(); current_element < top.next_element(); ++current_element)
+            top.output_data(ret).push_back(top.current_branch->elements[current_element](base));
+    }
+  public:
     Property operator()(Property const &base)
     {
         std::stack<stack_entry> entries;
@@ -294,30 +325,30 @@ struct PropertyTemplate {
           {
         	if (entries.empty())
                 entries.emplace(current_root++, branches, ret);
-            for (auto current_element = entries.top().prev_element(); current_element < entries.top().next_element(); ++current_element)
-                entries.top().output_data(ret).push_back(entries.top().current_branch->elements[current_element](base));
+            process_statics(entries.top(), ret, base);
             if (entries.top().current_line != entries.top().family_lines().end())
             {
+                //find possible child branch
                 entries.top().find_child_branch(base);
                 if (entries.top().current_child_branch == entries.top().current_child_branches().end())
                     throw template_value_error("Ran out of possibilities for dynamic element");
+                //push to stack to process next iteration
                 entries.emplace(entries.top().current_child_branch->out(base), branches, ret);
             }
             else
             {
+                //get format for parent branch to knoww
+                PropertyFormat *child_format = entries.top().current_branch->output_format;
+                //pop finished branch
                 entries.pop();
+                //empty stack means this is final iteration
                 if (entries.empty())
                     break;
-                byte child_id = 0; 
-              {
-                PropertyFormat* child_format = branches[entries.top().current_child_branch->out(base)].output_format;
-                std::vector<PropertyFormat*> &child_possibilities = entries.top().current_line->second;
-                while (child_id < child_possibilities.size() && child_possibilities[child_id] != child_format) // see issue #18
-                    ++child_id;
-                if (child_id == child_possibilities.size())
-                    throw std::invalid_argument("PropertyTemplate specified child branch that doesn't nest here");
-              }
+                //find child id using PropertyFormat*
+                auto child_id = entries.top().current_branch->output_format->child_id(entries.top().current_line, child_format);
+                //append it to parent branch
                 entries.top().output_data(ret).push_back(child_id);
+                //get ready for next iteration
                 ++entries.top().current_line;
             }
           }
