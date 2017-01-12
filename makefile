@@ -13,7 +13,7 @@ HDIR=include/Civil
 ## _CIVOBJS lists names without extensions of any files that
 ##      A. appear with a .cpp file extension in src
 ##  AND B. appear with a .h file extension in HDIR
-_CIVOBJS = Space Event EventObjects
+_CIVOBJS = Space Event EventObjects Properties
 
 ## _CIVIL lists names without extensions of some files that satisfy B without A
 _CIVIL = Entity EntitySignals
@@ -41,6 +41,8 @@ $(ODIR)/Event.o: $(HDIR)/Event.h $(HDIR)/Event.forward
 $(ODIR)/EventObjects.o $(ODIR)/Space.o: $(HDIR)/EventObjects.h $(HDIR)/Event.h $(HDIR)/Event.forward $(HDIR)/EntitySignals.h
 
 $(ODIR)/Space.o $(ODIR)/EventObjects.o: $(HDIR)/Entity.h $(HDIR)/EntitySignals.h $(HDIR)/Event.forward
+
+$(ODIR)/Properties.o: $(HDIR)/Properties.h
 
 #         #
 # Console #
@@ -74,8 +76,8 @@ $(CON_ODIR)/IO.o: $(HDIR)/EventObjects.h
 # Testing #
 #         #
 
-test: $(ODIR)/test.o
-	$(CXX) -o $@ $(ODIR)/test.o $(CXXFLAGS)
+test: $(ODIR)/test.o $(ODIR)/Properties.o
+	$(CXX) -o $@ $(ODIR)/test.o $(ODIR)/Properties.o $(CXXFLAGS)
 $(ODIR)/test.o: src/test.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
