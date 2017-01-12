@@ -1,18 +1,20 @@
-#include <Civil/Properties.h>
+#include <Civil/tax.h>
 
 #include <stack>
 
-// ****************** //
-// * PropertyFormat * //
-// ****************** //
+using namespace trg;
 
-PropertyFormat::family_type::size_type PropertyFormat::child_id(family_lines_type::const_iterator line, PropertyFormat *child_format) const
+// ********** //
+// * Format * //
+// ********** //
+
+Format::family_type::size_type Format::child_id(family_lines_type::const_iterator line, Format *child_format) const
 // see issue #18
 {
-    std::vector<PropertyFormat*> const &child_possibilities = line->second;
+    std::vector<Format*> const &child_possibilities = line->second;
     for 
     (
-        PropertyFormat::family_type::size_type child_id = 0;
+        Format::family_type::size_type child_id = 0;
         child_id < child_possibilities.size(); 
         ++child_id
     )
@@ -21,41 +23,41 @@ PropertyFormat::family_type::size_type PropertyFormat::child_id(family_lines_typ
     throw std::invalid_argument("specified child branch that doesn't nest here");
 }
 
-// ****************** //
-// * PropertyStruct * //
-// ****************** //
+// ********** //
+// * String * //
+// ********** //
 
-void Property::erase_branch(PropertyFormat* del)
+void String::erase_branch(Format* del)
 {
     if (!data.erase(del))
         return;
-    std::vector<PropertyFormat*> to_recurse {del};
+    std::vector<Format*> to_recurse {del};
     while (!to_recurse.empty())						// while there is still something on which to recurse
     {
-        PropertyFormat *this_layer = to_recurse.back();
+        Format *this_layer = to_recurse.back();
         to_recurse.pop_back();                      // remove this layer from list
         for (auto& p: this_layer->family_lines)	    // then for each possible group of children on this layer
-            for (PropertyFormat* next: p.second)    // in fact for each child
+            for (Format* next: p.second)    // in fact for each child
                 if (data.erase(next))			    // search for and delete the branch associated with that child
                     to_recurse.push_back(next);		// and recurse... unless the child wasn't found anyway
     }
 }
 
-void Property::check_branch(PropertyFormat* check)
+void String::check_branch(Format* check)
 {
     if (data.count(check))
         return;
     if (check->parent)
-        for (PropertyFormat* const &sibling: check->parent->family_lines.at(check->parent_index))
+        for (Format* const &sibling: check->parent->family_lines.at(check->parent_index))
             erase_branch(sibling);
     data[check].resize(check->format.size());
 }
 
-// ******************** //
-// * PropertyTemplate * //
-// ******************** //
+// ************ //
+// * Template * //
+// ************ //
 
-PropertyTemplate::stack_entry::stack_entry(std::vector<branch_template>::size_type current_branch_ind, std::vector<branch_template> &branches, Property &output)
+Template::stack_entry::stack_entry(std::vector<branch_template>::size_type current_branch_ind, std::vector<branch_template> &branches, String &output)
 {
     current_branch = branches.begin() + current_branch_ind;
     output_data(output).clear();
@@ -64,10 +66,10 @@ PropertyTemplate::stack_entry::stack_entry(std::vector<branch_template>::size_ty
     current_child_branch = current_child_branches().begin();
 }
 
-Property PropertyTemplate::operator()(Property const &base)
+String Template::operator()(String const &base)
 {
     std::stack<stack_entry> entries;
-    Property ret;
+    String ret;
     std::vector<branch_template>::size_type current_root = 0;
     while (!entries.empty() || current_root < root_num)
     {
@@ -88,13 +90,13 @@ Property PropertyTemplate::operator()(Property const &base)
         else
         {
             //get format for parent branch to knoww
-            PropertyFormat *child_format = entries.top().current_branch->output_format;
+            Format *child_format = entries.top().current_branch->output_format;
             //pop finished branch
             entries.pop();
             //empty stack means this is final iteration
             if (entries.empty())
                 break;
-            //find child id using PropertyFormat*
+            //find child id using Format*
             auto child_id = entries.top().current_branch->output_format->child_id(entries.top().current_line, child_format);
             //append it to parent branch
             entries.top().output_data(ret).push_back(child_id);
