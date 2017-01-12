@@ -3,6 +3,7 @@
 
 #include <IOStream>
 #include <array>
+#include <memory>
 
 using namespace std;
 using namespace trg;
@@ -112,22 +113,37 @@ void test_template_components()
         << (int) comparator(data_c) << endl;
 }
 
+string read_string(String data, Format *format)
+{
+    vector<byte> read;
+    data.write_out(back_inserter(read), format);
+    string out;
+    for (byte x: read)
+        out += to_string((int)x) + ", ";
+    return out.substr(0, out.size() - 2);
+}
+
 void test_template_routine()
 {
-    vector<Format> output_formats;
+    cout << "Making output format" << endl;
+    vector<unique_ptr<Format> > output_formats;
     output_formats.reserve(7);
-    output_formats.emplace_back(make_format(vector<byte>(1, 10*2)));
-    output_formats.emplace_back(make_format(vector<byte>(1, 5*2)), &output_formats[0], 2);
-    output_formats.emplace_back(make_format(vector<byte>(1, 1*2)), &output_formats[0], 2);
-    output_formats.emplace_back(make_format(vector<byte>(1, 1*2)), &output_formats[1], 1);
-    output_formats.emplace_back(make_format(vector<byte>(1, 1*2)), &output_formats[1], 3);
-    output_formats.emplace_back(make_format(vector<byte>(1, 1*2)), &output_formats[0], 7);
-    output_formats.emplace_back(make_format(vector<byte>(1, 0*2)), &output_formats[0], 8);
+    cout << "Making first one" << endl;
+    output_formats.emplace_back(new Format(make_format(vector<byte>(10*2, 1))));
+    cout << "Making second one" << endl;
+    output_formats.emplace_back(new Format(make_format(vector<byte>(5*2, 1)), output_formats[0].get(), 2));
+    output_formats.emplace_back(new Format(make_format(vector<byte>(3*2, 1)), output_formats[0].get(), 2));
+    output_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), output_formats[1].get(), 1));
+    output_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), output_formats[1].get(), 3));
+    output_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), output_formats[0].get(), 7));
+    output_formats.emplace_back(new Format(make_format(vector<byte>(0*2, 1)), output_formats[0].get(), 8));
     
-    Format input_root(make_format(vector<byte>(1, 1*2)));
+    cout << "Making input format";
+    Format input_root(make_format(vector<byte>(1*2, 1)));
     Format input_child_null(vector<pair<byte, byte> >(), &input_root, 0);
-    Format input_child(make_format(vector<byte>(1, 4*2)), &input_root, 0);
+    Format input_child(make_format(vector<byte>(4*2, 1)), &input_root, 0);
     
+    cout << "Making input data";
     constexpr unsigned data_num = 2;
     std::array<String, data_num> data;
     {
@@ -141,18 +157,24 @@ void test_template_routine()
                         0,
                     0, 
                 0, 0, 0, 0, 0, 
-                    0,
+                    0, 0, 0,
                 0, 0
             },*/
             vector<byte>{0},
             vector<byte>{1, 0, 0, 0, 0},
         };
         for (unsigned i = 0; i < data_num; ++i)
-            data[i].read_in(content[i].begin(), &output_formats[0]);
+            data[i].read_in(content[i].begin(), &input_root);
     }
-    
-    
-    
+    cout << "Making template parts" << endl;
+    datum zero_datum(0);
+    datum_template zero_datum_template{{zero_datum}};
+    cout << "Making template" << endl;
+    Template const_gen{{
+        {output_formats[2].get(), vector<datum_template>(3, zero_datum_template)}
+    }, 1};
+    cout << "Successfully prepared the stuff" << endl;
+    cout << "Expecting 0, 0, 0, got " << read_string(const_gen(data[0]), output_formats[2].get()) << endl;
 }
 
 int main()

@@ -44,6 +44,33 @@ public:
         parent(parent_c),
         parent_index(parent_index_c)
         {if (parent) parent->family_lines[parent_index].push_back(this);}
+    
+    void check_children()
+    {
+        for (auto const &line: family_lines)
+            for (Format *child: line.second)
+                child->parent = this;
+    }
+    
+    void clear_family()
+    {
+        parent = nullptr;
+        family_lines.clear();
+    }
+    
+    Format(Format &&base):
+        format(base.format),
+        family_lines(base.family_lines),
+        parent(base.parent),
+        parent_index(base.parent_index)
+        {
+            check_children();
+            std::vector<Format*> &siblings = parent->family_lines[parent_index];
+            for(auto it = siblings.begin(); it != siblings.end(); ++it) // see issue #18
+                if (*it == &base)
+                    *it = this;
+            base.clear_family(); //?
+        }
 };
 
 struct String
@@ -208,6 +235,13 @@ class Template {
     struct branch_template {
         Format *output_format; // could be more efficient to store parent index, and deduce the format by parent's format
         std::vector<datum_template> elements;
+        
+        branch_template(branch_template const&) = default;
+        branch_template() = default;
+        branch_template(Format *output_format_c, std::vector<datum_template> elements_c):
+            output_format(output_format_c),
+            elements(elements_c)
+            {}
     };
     
     struct stack_entry {
@@ -265,6 +299,11 @@ class Template {
 
   public:
     String operator()(String const &base);
+    
+    Template (std::vector<branch_template> branches_c, std::vector<branch_template>::size_type root_num_c):
+        branches(branches_c),
+        root_num(root_num_c)
+        {}
 };
 
     } // end namespace trg
