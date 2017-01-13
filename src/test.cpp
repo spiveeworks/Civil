@@ -85,8 +85,8 @@ void test_template_components()
     
     cout << endl;
     
-    comparison     child_a_not_5 {"01110", child_datum_a, const_datum};  // note reversed order in bitset ctor
-    comparison child_c_less_root {"00010", child_datum_c,  root_datum};
+    comparison     child_a_not_5 {"001110", child_datum_a, const_datum};  // note reversed order in bitset ctor
+    comparison child_c_less_root {"000010", child_datum_c,  root_datum};
     
     cout << "child 1 != 5; expecting true, true, true got " 
         << child_a_not_5(data_a) << ", " 

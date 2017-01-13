@@ -147,22 +147,27 @@ struct datum {
 struct comparison {
     // catches all expected errors and therefore always returns
     enum FLAGS 
-        {EQU, LSS, GTR, LUNDEF, RUNDEF, TOTAL};
-        //FLAGS = 5
+        {EQU, LSS, GTR, LUNDEF, RUNDEF, LRUNDEF, TOTAL};
+        //FLAGS = 6
     std::bitset<TOTAL> flags;
     datum ld, rd; // left and right data
     bool operator()(String const &base) const
     {
         byte lv, rv;
-      try
-        {lv = ld(base);}
-      catch(std::out_of_range)
-        {return flags[LUNDEF];}
-      try
-        {rv = rd(base);}
-      catch(std::out_of_range)
-        {return flags[RUNDEF];}
-        
+      {
+          bool lundef = false;
+        try
+          {lv = ld(base);}
+        catch(std::out_of_range)
+          {lundef = true;}
+        try
+          {rv = rd(base);}
+        catch(std::out_of_range)
+          {return lundef ? flags[LRUNDEF] : flags[RUNDEF];}
+
+          if (lundef)
+              return flags[LUNDEF];
+      }
         if (lv == rv)
             return flags[EQU];
         if (lv < rv)
