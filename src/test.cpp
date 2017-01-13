@@ -211,6 +211,24 @@ void test_template_routine()
         << output_formats[1]->child_id(3, output_formats[1]->family_lines.at(3)[0]) << endl;
     
     cout << "Expecting 0, 0, 0, 0, 0, 0, 0 got " << read_string(branch_stack_test(data[0]), output_formats[1].get()) << endl;
+    
+    cout << endl << "Preparing home stretch tests" << endl;
+    
+    vector<datum_template> root_elements = const_data({7, 1, 7, 3, 7});
+    root_elements[1].possibilities.emplace_back(2);
+    
+    Template branch_catch_test{(vector<Template::branch_template>){
+        (Template::branch_template){output_formats[1].get(), root_elements},
+        (Template::branch_template){output_formats[3].get(), {(datum_template)(vector<datum_template::conditioned_datum>)
+            {(datum_template::conditioned_datum){(datum)20, vector<comparison>{(comparison){"000001", {1, &input_child}, 20}}}}}
+        },
+        (Template::branch_template){output_formats[3].get(), const_data({0})},
+        (Template::branch_template){output_formats[4].get(), const_data({4})},
+    }, 1};
+    
+    cout << "Expecting 7, 0, 0, 7, 0, 4, 7 got " << read_string(branch_catch_test(data[0]), output_formats[1].get()) << endl;
+    cout << "Expecting 7, 0, 0, 7, 0, 4, 7 got " << read_string(branch_catch_test(data[1]), output_formats[1].get()) << endl;
+    cout << "Expecting 7, 0, 20, 7, 0, 4, 7 got " << read_string(branch_catch_test(data[2]), output_formats[1].get()) << endl;
 }
 
 int main()

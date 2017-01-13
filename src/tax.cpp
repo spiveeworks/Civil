@@ -71,17 +71,20 @@ String Template::operator()(String const &base)
     std::stack<stack_entry> entries;
     String ret;
     std::vector<branch_template>::size_type current_root = 0;
+    bool skip_statics = false;
     while (!entries.empty() || current_root < root_num)
     {
       try
       {
         if (entries.empty())
             entries.emplace(current_root++, branches, ret);
-        ProcessStatics(entries.top(), ret, base);
+        if (!skip_statics)
+            ProcessStatics(entries.top(), ret, base);
+        else
+            skip_statics = false;
         if (entries.top().current_line != entries.top().family_lines().end())
         {
             //find possible child branch
-            entries.top().begin_child_branches();
             entries.top().find_child_branch(base);
             if (entries.top().current_child_branch == entries.top().current_child_branches().end())
                 throw template_value_error("Ran out of possibilities for dynamic element");
@@ -102,7 +105,7 @@ String Template::operator()(String const &base)
             //append it to parent branch
             entries.top().output_data(ret).push_back(child_id);
             //get ready for next iteration
-            ++entries.top().current_line;
+            entries.top().next_family_line(); // also resets current_child_branch
         }
       }
       catch (template_value_error)
@@ -114,6 +117,7 @@ String Template::operator()(String const &base)
             if (!entries.empty())
                 entries.top().next_child_branch(base);
         } while (!entries.empty() && entries.top().current_child_branch == entries.top().current_child_branches().end());
+        skip_statics = true;
       }
     }
     return ret;

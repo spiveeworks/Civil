@@ -180,6 +180,8 @@ struct comparison {
         ld(ld_c),
         rd(rd_c)
         {}
+    comparison() = default;
+    comparison(comparison const&) = default;
 };
 
 class template_value_error: public std::logic_error
@@ -236,7 +238,7 @@ struct datum_template {
 };
 
 class Template {
-  private:
+  public:
     struct branch_template {
         Format *output_format; // could be more efficient to store parent index, and deduce the format by parent's format
         std::vector<datum_template> elements;
@@ -248,7 +250,7 @@ class Template {
             elements(elements_c)
             {}
     };
-    
+  private:
     struct stack_entry {
         std::vector<branch_template>::iterator current_branch;
         Format::family_lines_type::iterator current_line;
@@ -292,6 +294,12 @@ class Template {
         {
             ++current_child_branch;
             find_child_branch(base);
+        }
+        void next_family_line()
+        {
+            ++current_line;
+            if (current_line != family_lines().end())
+                begin_child_branches();
         }
     };
 
