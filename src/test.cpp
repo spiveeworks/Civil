@@ -212,7 +212,7 @@ void test_template_routine()
     
     cout << "Expecting 0, 0, 0, 0, 0, 0, 0 got " << read_string(branch_stack_test(data[0]), output_formats[1].get()) << endl;
     
-    cout << endl << "Preparing home stretch tests" << endl;
+    cout << endl << "Preparing catch-pop test" << endl;
     
     vector<datum_template> root_elements = const_data({7, 1, 7, 3, 7});
     root_elements[1].possibilities.emplace_back(2);
@@ -229,6 +229,46 @@ void test_template_routine()
     cout << "Expecting 7, 0, 0, 7, 0, 4, 7 got " << read_string(branch_catch_test(data[0]), output_formats[1].get()) << endl;
     cout << "Expecting 7, 0, 0, 7, 0, 4, 7 got " << read_string(branch_catch_test(data[1]), output_formats[1].get()) << endl;
     cout << "Expecting 7, 0, 20, 7, 0, 4, 7 got " << read_string(branch_catch_test(data[2]), output_formats[1].get()) << endl;
+    
+    cout << endl << "Preparing multi-pop test" << endl;
+    
+    vector<unique_ptr<Format> > pop_test_formats;
+    pop_test_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1))));
+    pop_test_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), pop_test_formats[0].get(), 0));
+    pop_test_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), pop_test_formats[1].get(), 0));
+    pop_test_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), pop_test_formats[2].get(), 0));
+    
+    Template branch_pop_test{{
+        {pop_test_formats[0].get(), const_data({2})}, //0
+        {pop_test_formats[0].get(), const_data({5})}, //1
+        {pop_test_formats[1].get(), const_data({3})}, //2
+        {pop_test_formats[2].get(), const_data({4})}, //3
+        {pop_test_formats[3].get(), {(datum_template)(vector<datum_template::conditioned_datum>) //4
+            {
+                {255, { (comparison){"111000", {2, &input_child}, (datum)0} }}
+            }
+        }},
+        {pop_test_formats[1].get(), const_data({6})}, //5
+        {pop_test_formats[2].get(), {(datum_template)(vector<datum_template::conditioned_datum>) //6
+            {
+                {7, { (comparison){"111110", {1, &input_child}, (datum)20} }}
+            }
+        }},
+        {pop_test_formats[3].get(), const_data({0})}, //7
+    }, 2};
+    
+    
+    cout << "Expecting 0, 0, 0, 255 got " << read_string(branch_pop_test(data[0]), pop_test_formats[0].get()) << endl;
+    cout << "Expecting 0, 0, 0, 0 got " << read_string(branch_pop_test(data[1]), pop_test_formats[0].get()) << endl;
+    cout << "Expecting throw got "; 
+  try
+  {
+    cout << read_string(branch_pop_test(data[2]), pop_test_formats[0].get()) << endl;
+  }
+  catch(out_of_range)
+  {
+    cout << "throw" << endl;
+  }
 }
 
 int main()
