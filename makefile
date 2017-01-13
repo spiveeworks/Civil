@@ -72,17 +72,6 @@ $(CON_ODIR)/IO.o: $(HDIR)/Entity.h
 $(CON_ODIR)/IO.o: $(HDIR)/Space.h
 $(CON_ODIR)/IO.o: $(HDIR)/EventObjects.h
 
-#         #
-# Testing #
-#         #
-
-test: $(ODIR)/test.o $(ODIR)/tax.o
-	$(CXX) -o $@ $(ODIR)/test.o $(ODIR)/tax.o $(CXXFLAGS)
-$(ODIR)/test.o: src/test.cpp
-	$(CXX) -c -o $@ $< $(CXXFLAGS)
-
-$(ODIR)/test.o: $(HDIR)/tax.h
-
 #            #
 # make stuff #
 #            #
