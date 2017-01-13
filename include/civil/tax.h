@@ -35,7 +35,7 @@ public:
         auto line = family_lines.find(line_index);
         // think of it as an empty vector, find will always fail
         if (line == family_lines.end())
-            throw std::invalid_argument("specified child branch that doesn't nest here");
+            throw std::invalid_argument("specified child branch that doesn't nest here - line is empty");
         return child_id(line, child_format);
     }
     
@@ -264,6 +264,8 @@ class Template {
             {return current_branch->output_format->family_lines;}
         std::vector<datum_template::conditioned_datum>& current_child_branches () const
             {return current_branch->elements[current_line->first].possibilities;}  // takes the array of possible children associated with the current_line iterator, unwrapping the datum_template, since operator() is not needed in this context
+        void begin_child_branches ()
+            {current_child_branch = current_child_branches().begin();}
         std::vector<datum_template>::size_type prev_element() const
         {
             if (current_line == family_lines().begin()) 

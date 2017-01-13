@@ -123,6 +123,15 @@ string read_string(String data, Format *format)
     return out.substr(0, out.size() - 2);
 }
 
+vector<datum_template> const_data (vector<byte> base) 
+{
+    vector<datum_template> ret;
+    ret.reserve(base.size());
+    for(byte x: base)
+        ret.emplace_back((vector<datum_template::conditioned_datum>){(datum_template::conditioned_datum)(datum)x});
+    return ret;
+}
+
 void test_template_routine()
 {
     cout << "Making output format" << endl;
@@ -135,8 +144,19 @@ void test_template_routine()
     output_formats.emplace_back(new Format(make_format(vector<byte>(3*2, 1)), output_formats[0].get(), 2));
     output_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), output_formats[1].get(), 1));
     output_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), output_formats[1].get(), 3));
-    output_formats.emplace_back(new Format(make_format(vector<byte>(1*2, 1)), output_formats[0].get(), 7));
+    output_formats.emplace_back(new Format(make_format(vector<byte>(3*2, 1)), output_formats[0].get(), 7));
     output_formats.emplace_back(new Format(make_format(vector<byte>(0*2, 1)), output_formats[0].get(), 8));
+    /*{
+        0, 0, 0, 
+            0, 0, 
+                0,
+            0, 0, 
+                0,
+            0, 
+        0, 0, 0, 0, 0, 
+            0, 0, 0,
+        0, 0
+    },*/
     
     cout << "Making input format";
     Format input_root(make_format(vector<byte>(1*2, 1)));
@@ -144,37 +164,53 @@ void test_template_routine()
     Format input_child(make_format(vector<byte>(4*2, 1)), &input_root, 0);
     
     cout << "Making input data";
-    constexpr unsigned data_num = 2;
+    constexpr unsigned data_num = 3;
     std::array<String, data_num> data;
     {
         std::array<vector<byte>, data_num> content =
         {
-            /*{
-                0, 0, 0, 
-                    0, 0, 
-                        0,
-                    0, 0, 
-                        0,
-                    0, 
-                0, 0, 0, 0, 0, 
-                    0, 0, 0,
-                0, 0
-            },*/
             vector<byte>{0},
-            vector<byte>{1, 0, 0, 0, 0},
+            vector<byte>{1, 0, 1, 2, 37},
+            vector<byte>{1, 0, 20, 1, 8},
         };
         for (unsigned i = 0; i < data_num; ++i)
             data[i].read_in(content[i].begin(), &input_root);
     }
     cout << "Making template parts" << endl;
     datum zero_datum(0);
-    datum_template zero_datum_template{{zero_datum}};
+    datum fetch_37(3, &input_child);
+    datum fetch_1(1, &input_child);
+    datum fetch_2(2, &input_child);
+    datum one_datum(1);
+    
+    comparison one_lss_two("010010", one_datum, fetch_2);
+    
+    datum_template zero_datum_template{{{zero_datum}}};
+    datum_template fetch_1_if_1lss2{{{fetch_1, {one_lss_two}}, {zero_datum}}};
+    datum_template fetch_37_or_zero{{{fetch_37}, {zero_datum}}};
     cout << "Making template" << endl;
-    Template const_gen{{
-        {output_formats[2].get(), vector<datum_template>(3, zero_datum_template)}
+    Template datum_tester{{
+        {output_formats[2].get(), vector<datum_template>{zero_datum_template, fetch_1_if_1lss2, fetch_37_or_zero}}
     }, 1};
-    cout << "Successfully prepared the stuff" << endl;
-    cout << "Expecting 0, 0, 0, got " << read_string(const_gen(data[0]), output_formats[2].get()) << endl;
+    cout << endl << "Successfully prepared the stuff" << endl;
+    cout << "Expecting 0, 0, 0, got " << read_string(datum_tester(data[0]), output_formats[2].get()) << endl;
+    cout << "Expecting 0, 1, 37, got " << read_string(datum_tester(data[1]), output_formats[2].get()) << endl;
+    cout << "Expecting 0, 0, 8, got " << read_string(datum_tester(data[2]), output_formats[2].get()) << endl;
+    
+    cout << endl;
+    
+    Template branch_stack_test{{
+        {output_formats[1].get(), const_data({0, 1, 0, 2, 0})},
+        {output_formats[1]->family_lines.at(1)[0], const_data({0})},
+        {output_formats[1]->family_lines.at(3)[0], const_data({0})},
+    }, 1};
+    cout << "Expecting 0, 1, 0, 0 got " 
+        << output_formats[0]->child_id(2, output_formats[1].get()) << ", "
+        << output_formats[0]->child_id(2, output_formats[2].get()) << ", "
+        << output_formats[1]->child_id(1, output_formats[1]->family_lines.at(1)[0]) << ", "
+        << output_formats[1]->child_id(3, output_formats[1]->family_lines.at(3)[0]) << endl;
+    
+    cout << "Expecting 0, 0, 0, 0, 0, 0, 0 got " << read_string(branch_stack_test(data[0]), output_formats[1].get()) << endl;
 }
 
 int main()

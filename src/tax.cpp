@@ -63,7 +63,7 @@ Template::stack_entry::stack_entry(std::vector<branch_template>::size_type curre
     output_data(output).clear();
     output_data(output).reserve(current_branch->output_format->format.size());
     current_line = family_lines().begin();
-    current_child_branch = current_child_branches().begin();
+    begin_child_branches();
 }
 
 String Template::operator()(String const &base)
@@ -81,6 +81,7 @@ String Template::operator()(String const &base)
         if (entries.top().current_line != entries.top().family_lines().end())
         {
             //find possible child branch
+            entries.top().begin_child_branches();
             entries.top().find_child_branch(base);
             if (entries.top().current_child_branch == entries.top().current_child_branches().end())
                 throw template_value_error("Ran out of possibilities for dynamic element");
